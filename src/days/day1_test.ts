@@ -15,7 +15,12 @@ Deno.test("Part 1 example", () => {
 
 Deno.test("part 2 example", () => {
 	const input = `
-	
+3   4
+4   3
+2   5
+1   3
+3   9
+3   3
 	`.trim();
-	assertEquals(part2(input), 0);
+	assertEquals(part2(input), 31);
 });

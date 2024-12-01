@@ -34,6 +34,17 @@ export function part1(input: string): number {
 }
 
 export function part2(input: string): number {
-	// TODO: Implement part 2 here.
-	return input.length;
+	const firstList: Array<number> = [];
+	const secondList: Array<number> = [];
+	input.split("\n").forEach((line) => {
+		const parts = line.split(" ");
+		firstList.push(parseInt(parts[0]));
+		secondList.push(parseInt(parts[parts.length - 1]));
+	});
+
+	return firstList.reduce(
+		(prev, first) =>
+			prev + (first * secondList.filter((s) => s == first).length),
+		0,
+	);
 }
