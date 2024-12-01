@@ -24,11 +24,11 @@ export function part1(input: string): number {
 		secondList.push(parseInt(parts[parts.length - 1]));
 	});
 
-	const firstSorted = firstList.sort();
-	const secondSorted = secondList.sort();
-	console.log("f", firstList, "s", secondList);
-	return firstSorted.reduce(
-		(prev, first, index) => prev + Math.abs(first - secondSorted[index]),
+	firstList.sort();
+	secondList.sort();
+
+	return firstList.reduce(
+		(prev, first, index) => prev + Math.abs(first - secondList[index]),
 		0,
 	);
 }
