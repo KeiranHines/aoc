@@ -1,5 +1,3 @@
-import { white } from "jsr:@std/internal@^1.0.5/styles";
-
 export async function main() {
 	const filepath = import.meta.filename || "";
 	const parts = filepath.split("/");
@@ -49,9 +47,7 @@ function validateNumber(
 	num: number,
 	direction: number,
 ) {
-	//console.log(prev, num);
 	if (num > prev + 3 || num < prev - 3 || num == prev) {
-		//	console.log("first 0");
 		return 0;
 	}
 	if (num > prev && direction >= 0) {
@@ -60,7 +56,6 @@ function validateNumber(
 	if (num < prev && direction <= 0) {
 		return -1;
 	}
-	//console.log("second 0");
 	return 0;
 }
 
@@ -73,40 +68,22 @@ function validateReport(report: number[], oneBad = false): boolean {
 		}
 		if (v == 0 || v != direction) {
 			if (oneBad) {
-				//			console.log("failed", v == 0, v != direction, direction);
 				return false;
 			}
-			const withoutPrev = [
-				...report.slice(0, i - 1),
-				...report.slice(i, report.length),
-			];
-			const withoutCurrent = [
-				...report.slice(0, i),
-				...report.slice(i + 1, report.length),
-			];
-			/*	console.log(
-				"checking next lists",
-				report,
-				withoutPrev,
-				withoutCurrent,
-			);*/
-			return validateReport(withoutPrev, true) ||
-				validateReport(withoutCurrent, true);
+			return report.some((_, index, list) => {
+				const removed = [...list];
+				removed.splice(index, 1);
+				return validateReport(removed, true);
+			});
 		}
 	}
 	return true;
 }
 
 export function part2(input: string): number {
-	let iv = 0;
 	const safe = input.split("\n").filter((report) => {
 		const levels = report.split(" ").map((level) => parseInt(level));
-		const valid = validateReport(levels);
-		if (!valid) {
-			iv++;
-			console.log(levels, "is valid?", valid, iv);
-		}
-		return valid;
+		return validateReport(levels);
 	});
-	return safe.length; // TODO: Implement part 2 here.
+	return safe.length;
 }
