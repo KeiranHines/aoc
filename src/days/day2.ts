@@ -1,14 +1,15 @@
 export async function main() {
 	const filepath = import.meta.filename || "";
 	const parts = filepath.split("/");
-	const DAY = parts[parts.length - 1].split(".")[0];
+	let day = parts[parts.length - 1].split(".")[0];
 
-	const input = await Deno.readTextFile(`inputs/${DAY}`).catch(() => {
-		console.warn(`Could not read file inputs/${DAY}`);
+	const input = await Deno.readTextFile(`inputs/${day}`).catch(() => {
+		console.warn(`Could not read file inputs/${day}`);
 		Deno.exit(1);
 	}).then((i) => i.trim());
-	console.log(`Day ${DAY} part 1 answer is: `, part1(input));
-	console.log(`Day ${DAY} part 2 answer is: `, part2(input));
+	day = day.replace("day", "");
+	console.log(`Day ${day} part 1 answer is: `, part1(input));
+	console.log(`Day ${day} part 2 answer is: `, part2(input));
 }
 
 if (import.meta.main) {
