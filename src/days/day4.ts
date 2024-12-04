@@ -169,6 +169,37 @@ export function part1(input: string): number {
 }
 
 export function part2(input: string): number {
-	// TODO: Implement part 2 here.
-	return input.length;
+	const map = input.split("\n").map((line) => line.split(""));
+	let matches = 0;
+	map.forEach((row, rowNum) => {
+		row.forEach((char, colNum) => {
+			if (char === "A") {
+				matches = checkDownLeft(map, rowNum, colNum, ["M"]) &&
+						checkUpRight(map, rowNum, colNum, ["S"]) &&
+						checkUpLeft(map, rowNum, colNum, ["M"]) &&
+						checkDownRight(map, rowNum, colNum, ["S"])
+					? matches + 1
+					: matches;
+				matches = checkDownLeft(map, rowNum, colNum, ["M"]) &&
+						checkUpRight(map, rowNum, colNum, ["S"]) &&
+						checkUpLeft(map, rowNum, colNum, ["S"]) &&
+						checkDownRight(map, rowNum, colNum, ["M"])
+					? matches + 1
+					: matches;
+				matches = checkDownLeft(map, rowNum, colNum, ["S"]) &&
+						checkUpRight(map, rowNum, colNum, ["M"]) &&
+						checkUpLeft(map, rowNum, colNum, ["M"]) &&
+						checkDownRight(map, rowNum, colNum, ["S"])
+					? matches + 1
+					: matches;
+				matches = checkDownLeft(map, rowNum, colNum, ["S"]) &&
+						checkUpRight(map, rowNum, colNum, ["M"]) &&
+						checkUpLeft(map, rowNum, colNum, ["S"]) &&
+						checkDownRight(map, rowNum, colNum, ["M"])
+					? matches + 1
+					: matches;
+			}
+		});
+	});
+	return matches;
 }
