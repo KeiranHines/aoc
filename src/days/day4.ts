@@ -174,30 +174,16 @@ export function part2(input: string): number {
 	map.forEach((row, rowNum) => {
 		row.forEach((char, colNum) => {
 			if (char === "A") {
-				matches = checkDownLeft(map, rowNum, colNum, ["M"]) &&
-						checkUpRight(map, rowNum, colNum, ["S"]) &&
-						checkUpLeft(map, rowNum, colNum, ["M"]) &&
-						checkDownRight(map, rowNum, colNum, ["S"])
-					? matches + 1
-					: matches;
-				matches = checkDownLeft(map, rowNum, colNum, ["M"]) &&
-						checkUpRight(map, rowNum, colNum, ["S"]) &&
-						checkUpLeft(map, rowNum, colNum, ["S"]) &&
-						checkDownRight(map, rowNum, colNum, ["M"])
-					? matches + 1
-					: matches;
-				matches = checkDownLeft(map, rowNum, colNum, ["S"]) &&
-						checkUpRight(map, rowNum, colNum, ["M"]) &&
-						checkUpLeft(map, rowNum, colNum, ["M"]) &&
-						checkDownRight(map, rowNum, colNum, ["S"])
-					? matches + 1
-					: matches;
-				matches = checkDownLeft(map, rowNum, colNum, ["S"]) &&
-						checkUpRight(map, rowNum, colNum, ["M"]) &&
-						checkUpLeft(map, rowNum, colNum, ["S"]) &&
-						checkDownRight(map, rowNum, colNum, ["M"])
-					? matches + 1
-					: matches;
+				const forwardSlash =
+					(checkDownLeft(map, rowNum, colNum, ["M"]) &&
+						checkUpRight(map, rowNum, colNum, ["S"])) ||
+					(checkDownLeft(map, rowNum, colNum, ["S"]) &&
+						checkUpRight(map, rowNum, colNum, ["M"]));
+				const backSlash = checkUpLeft(map, rowNum, colNum, ["M"]) &&
+						checkDownRight(map, rowNum, colNum, ["S"]) ||
+					(checkUpLeft(map, rowNum, colNum, ["S"]) &&
+						checkDownRight(map, rowNum, colNum, ["M"]));
+				matches = backSlash && forwardSlash ? matches + 1 : matches;
 			}
 		});
 	});
