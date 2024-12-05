@@ -57,6 +57,41 @@ export function part1(input: string): number {
 }
 
 export function part2(input: string): number {
-	// TODO: Implement part 2 here.
-	return input.length;
+	const [orders, updates] = input.split("\n\n");
+	const orderMap: { [key: string]: Array<string> } = {};
+	orders.split("\n").forEach((order) => {
+		const [pre, post] = order.split("|");
+		if (!Object.hasOwn(orderMap, post)) {
+			orderMap[post] = [];
+		}
+		orderMap[post].push(pre);
+	});
+	return updates.split("\n").reduce((total, update) => {
+		let needsSort = true;
+		let changed = false;
+		let pages = update.split(",");
+		while (needsSort) {
+			needsSort = false;
+			const temp: Array<string> = [];
+			for (let i = 0; i < pages.length; i++) {
+				const order = orderMap[pages[i]];
+				const after = [];
+				for (const otherPage of pages.slice(i + 1)) {
+					if (order && order.includes(otherPage)) {
+						temp.push(otherPage);
+						needsSort = true;
+						changed = true;
+					} else {
+						after.push(otherPage);
+					}
+				}
+				temp.push(pages[i]);
+				if (needsSort) {
+					pages = [...temp, ...after];
+					break;
+				}
+			}
+		}
+		return changed ? total + (+pages[(pages.length - 1) / 2]) : total;
+	}, 0);
 }
