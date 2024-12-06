@@ -68,6 +68,45 @@ export function part1(input: string): number {
 	}
 }
 
+function solveMap(pos: Array<number>, map: Array<Array<string>>): boolean {
+	let dir = up;
+	let cycle = true;
+	try {
+		while (true) {
+			const next = pos.map((a, i) => a + dir[i]);
+			const square = map[next[0]][next[1]];
+			if (square == undefined) {
+				return false;
+			}
+			if (square == "." || square == "^" || square == "X") {
+				// Step
+				if (square != "X") {
+					cycle = false;
+				}
+				map[pos[0]][pos[1]] = "X";
+				pos = next;
+			}
+			if (square == "#") {
+				dir = turnRight(dir);
+				if (dir == up) {
+					if (cycle) {
+						return true;
+					} else {
+						cycle = true;
+					}
+				}
+			}
+		}
+	} catch (_e) {
+		map[pos[0]][pos[1]] = "X";
+		return false;
+	}
+}
+
+function copyMap(map: Array<Array<string>>): Array<Array<string>> {
+	return map.map((r) => [...r]);
+}
+
 export function part2(input: string): number {
 	let startPos = [0, 0];
 	const originalMap = input.split("\n").map((row, rowIndex) => {
@@ -77,47 +116,23 @@ export function part2(input: string): number {
 		}
 		return row.split("");
 	});
+
+	const xMap = copyMap(originalMap);
+	solveMap(startPos, xMap);
+
 	let totalOptions = 0;
 	originalMap.forEach((row, rowIndex) => {
 		row.forEach((point, pointIndex) => {
-			const map = originalMap.map((r) => [...r]);
+			const map = copyMap(originalMap);
 			map[rowIndex][pointIndex] = "#";
-			if (point !== "^" && point !== "#") {
+			if (
+				point !== "^" && point !== "#" &&
+				xMap[rowIndex][pointIndex] === "X"
+			) {
 				// Added an obs to the new position. Run the map until a cycle is
 				// detected
-				let dir = up;
-				let pos = startPos;
-				let cycle = true;
-
-				try {
-					while (true) {
-						const next = pos.map((a, i) => a + dir[i]);
-						const square = map[next[0]][next[1]];
-						if (square == undefined) {
-							break;
-						}
-						if (square == "." || square == "^" || square == "X") {
-							// Step
-							if (square != "X") {
-								cycle = false;
-							}
-							map[pos[0]][pos[1]] = "X";
-							pos = next;
-						}
-						if (square == "#") {
-							dir = turnRight(dir);
-							if (dir == up) {
-								if (cycle) {
-									totalOptions++;
-									break;
-								} else {
-									cycle = true;
-								}
-							}
-						}
-					}
-				} catch (_e) {
-					map[pos[0]][pos[1]] = "X";
+				if (solveMap(startPos, map)) {
+					totalOptions++;
 				}
 			}
 			// Reset to what the point was
