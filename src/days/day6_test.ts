@@ -1,0 +1,23 @@
+import { assertEquals } from "@std/assert";
+import { part1, part2 } from "./day6.ts";
+
+const input = `
+....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...
+	`.trim();
+
+Deno.test("Day 6 Part 1", () => {
+	assertEquals(part1(input), 41);
+});
+
+Deno.test("Day 6 part 2", () => {
+	assertEquals(part2(input), 0);
+});
