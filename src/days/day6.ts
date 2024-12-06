@@ -62,130 +62,9 @@ export function part1(input: string): number {
 				dir = turnRight(dir);
 			}
 		}
-	} catch (e) {
+	} catch (_e) {
 		map[pos[0]][pos[1]] = "X";
 		return total + 1;
-	}
-}
-
-function checkHittingRight(
-	start: Array<number>,
-	rowIndex: number,
-	colIndex: number,
-	map: Array<Array<string>>,
-) {
-	let obsUp: Array<number> | undefined = undefined;
-	let obsRight: Array<number> | undefined = undefined;
-	if (rowIndex + 1 >= map.length) {
-		return false;
-	}
-	const row = map[rowIndex + 1];
-	for (let i = colIndex + 1; i < row.length; i++) {
-		if (row[i] === "#") {
-			obsRight = [rowIndex, i];
-		}
-	}
-	for (let i = rowIndex - 1; i >= 0; i--) {
-		if (map[i][colIndex + 1] === "#") {
-			obsUp = [i, colIndex + 1];
-			break;
-		}
-	}
-	if (!obsUp && !obsRight) {
-		// Need at least one of these corners
-		return false;
-	}
-	if (obsUp && obsRight) {
-		// Have both upper and right corner
-		// validate top right corner can be placed
-		if (obsUp[0] - 1 === start[0] && obsRight[1] - 1 === start[1]) {
-			// Cannot place obs on start spot
-			return false;
-		}
-		const lastRow = map[obsUp[0] + 1];
-		for (let i = colIndex; i <= obsRight[1]; i++) {
-			if (lastRow[i] === "#") {
-				// There is another obs in our way.
-				return false;
-			}
-		}
-		return true;
-	}
-	if (obsUp) {
-		// Find top right and fill bottom right
-		const row2 = map[obsUp[0] + 1];
-		for (let i = colIndex + 1; i < map.length; i++) {
-			if (row2[i] === "#") {
-				const lastCol = i - 1;
-				for (let j = obsUp[0] + 1; j <= rowIndex; j++) {
-					if (map[j][i] === "#") {
-						return false;
-					}
-				}
-				if (rowIndex == start[0] && lastCol == start[1]) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	if (obsRight) {
-		for (let i = rowIndex; i >= 0; i--) {
-			if (map[i][obsRight[1]] === "#") {
-				const lastRow = i + 1;
-				for (let j = obsRight[1]; i >= colIndex + 2; j--) {
-					if (map[lastRow][j] === "#") {
-						return false;
-					}
-				}
-				if (lastRow == start[0] && colIndex + 1 == start[1]) {
-					return false;
-				}
-				return true;
-			}
-		}
-	}
-}
-
-function checkHittingLeft(
-	start: Array<number>,
-	rowIndex: number,
-	colIndex: number,
-	map: Array<Array<string>>,
-) {
-	let obsDown: Array<number> | undefined = undefined;
-	let obsLeft: Array<number> | undefined = undefined;
-	const row = map[rowIndex];
-	for (let i = colIndex - 1; i >= 0; i--) {
-		if (row[i] === "#") {
-			obsLeft = [rowIndex, i];
-		}
-	}
-	for (let i = rowIndex + 1; i < map.length; i++) {
-		if (map[i][colIndex - 1] === "#") {
-			obsDown = [i, colIndex - 1];
-			break;
-		}
-	}
-	if (!obsDown && !obsLeft) {
-		// Need at least one of these corners
-		return false;
-	}
-	if (obsDown && obsLeft) {
-		// I am top right, have bottom right and top left
-		// validate bottom left corner can be placed
-		if (obsDown[0] - 1 === start[0] && obsLeft[1] + 1 === start[1]) {
-			// Cannot place obs on start spot
-			return false;
-		}
-		const lastRow = map[obsDown[0] - 1];
-		for (let i = colIndex; i >= 0; i--) {
-			if (lastRow[i] === "#") {
-				// There is another obs in our way.
-				return false;
-			}
-		}
-		return true;
 	}
 }
 
@@ -221,8 +100,8 @@ export function part2(input: string): number {
 							// Step
 							if (square != "X") {
 								cycle = false;
-								map[pos[0]][pos[1]] = "X";
 							}
+							map[pos[0]][pos[1]] = "X";
 							pos = next;
 						}
 						if (square == "#") {
@@ -230,11 +109,6 @@ export function part2(input: string): number {
 							if (dir == up) {
 								if (cycle) {
 									totalOptions++;
-									console.log(
-										rowIndex,
-										pointIndex,
-										"is a cycle",
-									);
 									break;
 								} else {
 									cycle = true;
@@ -242,7 +116,7 @@ export function part2(input: string): number {
 							}
 						}
 					}
-				} catch (e) {
+				} catch (_e) {
 					map[pos[0]][pos[1]] = "X";
 				}
 			}
