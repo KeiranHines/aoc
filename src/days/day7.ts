@@ -10,7 +10,7 @@ export async function main() {
 		Deno.exit(1);
 	}).then((i) => i.trim());
 	day = day.replace("day", "");
-	console.log(`Day ${day} part 1 answer is: `, part1(input));
+	//console.log(`Day ${day} part 1 answer is: `, part1(input));
 	console.log(`Day ${day} part 2 answer is: `, part2(input));
 }
 
@@ -20,6 +20,10 @@ if (import.meta.main) {
 
 //@ts-expect-error i said so
 function* combinationN(array: Array<number>, n: number) {
+	if (n === 0) {
+		yield [];
+		return;
+	}
 	if (n === 1) {
 		for (const a of array) {
 			yield [a];
@@ -34,16 +38,16 @@ function* combinationN(array: Array<number>, n: number) {
 		}
 	}
 }
-
 function findTotal(opts: Array<number>, total: number) {
-	for (let i = 1; i < opts.length; i++) {
+	for (let i = 0; i <= opts.length; i++) {
 		const indexMap = opts.map((_, index) => index);
 		for (const c of combinationN(indexMap, i)) {
+			//console.log(opts, ":", c);
 			const calc = opts.reduce((total, opt, index) => {
+				if (index == 0) {
+					return opt;
+				}
 				if (c.includes(index)) {
-					if (total == 0) {
-						return 1 * opt;
-					}
 					return total * opt;
 				}
 				return total + opt;
@@ -55,28 +59,55 @@ function findTotal(opts: Array<number>, total: number) {
 	}
 	return false;
 }
+function findTotalConcat(opts: Array<number>, total: number) {
+	for (let j = 0; j <= opts.length; j++) {
+		for (let i = 0; i <= opts.length; i++) {
+			const indexMap = opts.map((_, index) => index);
+			for (const c1 of combinationN(indexMap, j)) {
+				for (const c of combinationN(indexMap, i)) {
+					//console.log(opts, ":", c);
+					const calc = opts.reduce((total, opt, index) => {
+						if (index == 0) {
+							return opt;
+						}
+						if (c.includes(index) && c1.includes(index)) {
+							return total * opt;
+						}
+						if (c.includes(index)) {
+							return total + opt;
+						}
+						return +("" + total + "" + opt);
+					}, 0);
+					if (calc == total) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
 
 export function part1(input: string): number {
 	return input.split("\n").reduce((total, equation) => {
 		const [targetString, optString] = equation.split(": ");
 		const target = +targetString;
 		const opts = optString.split(" ").map((opt) => +opt);
-		const max = opts.reduce((total, opt) => total * opt, 1);
-		const min = opts.reduce((total, opt) => total + opt, 0);
-		if (min >= target || max >= target) {
-			// In range of possible
-			if (min == target || max == target) {
-				return total + target;
-			}
-			if (findTotal(opts, target)) {
-				return total + target;
-			}
+		if (findTotal(opts, target)) {
+			return total + target;
 		}
 		return total;
 	}, 0);
 }
 
 export function part2(input: string): number {
-	// TODO: Implement part 2 here.
-	return input.length;
+	return input.split("\n").reduce((total, equation) => {
+		const [targetString, optString] = equation.split(": ");
+		const target = +targetString;
+		const opts = optString.split(" ").map((opt) => +opt);
+		if (findTotalConcat(opts, target)) {
+			return total + target;
+		}
+		return total;
+	}, 0);
 }
