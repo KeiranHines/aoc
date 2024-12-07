@@ -37,9 +37,10 @@ function* combinationN(array: Array<number>, n: number) {
 
 function findTotal(opts: Array<number>, total: number) {
 	for (let i = 1; i < opts.length; i++) {
-		for (const c of combinationN(opts, i)) {
-			const calc = opts.reduce((total, opt) => {
-				if (c.includes(opt)) {
+		const indexMap = opts.map((_, index) => index);
+		for (const c of combinationN(indexMap, i)) {
+			const calc = opts.reduce((total, opt, index) => {
+				if (c.includes(index)) {
 					if (total == 0) {
 						return 1 * opt;
 					}
@@ -60,8 +61,16 @@ export function part1(input: string): number {
 		const [targetString, optString] = equation.split(": ");
 		const target = +targetString;
 		const opts = optString.split(" ").map((opt) => +opt);
-		if (findTotal(opts, target)) {
-			return total + target;
+		const max = opts.reduce((total, opt) => total * opt, 1);
+		const min = opts.reduce((total, opt) => total + opt, 0);
+		if (min >= target || max >= target) {
+			// In range of possible
+			if (min == target || max == target) {
+				return total + target;
+			}
+			if (findTotal(opts, target)) {
+				return total + target;
+			}
 		}
 		return total;
 	}, 0);
