@@ -28,8 +28,7 @@ class Point {
 		this.y = y;
 	}
 }
-
-function calculateScore(start: Point, map: Array<Array<Point>>): number {
+function calculateTotalScore(start: Point, map: Array<Array<Point>>): number {
 	if (start.topography === 9) {
 		start.score++;
 		start.seen = true;
@@ -63,17 +62,59 @@ function calculateScore(start: Point, map: Array<Array<Point>>): number {
 			toCheck.push(down);
 		}
 	}
-	console.log("\t", start, "toCheck = ", toCheck);
 	while (toCheck.length > 0) {
 		const next = toCheck.pop();
 		if (next && !next.seen) {
-			start.score += calculateScore(next, map);
+			start.score += calculateTotalScore(next, map);
 		} else {
 			start.score += next?.score || 0;
 		}
 	}
 
 	return start.score;
+}
+function calculateScore(start: Point, map: Array<Array<Point>>): Array<Point> {
+	if (start.topography === 9) {
+		start.score++;
+		start.seen = true;
+		return [start];
+	}
+	start.seen = true;
+	const ends: Set<Point> = new Set();
+	const toCheck: Array<Point> = [];
+
+	if (start.x > 0) {
+		const left = map[start.y][start.x - 1];
+		if (start.topography + 1 === left.topography) {
+			toCheck.push(left);
+		}
+	}
+	if (start.x < map[start.y].length - 1) {
+		const right = map[start.y][start.x + 1];
+		if (start.topography + 1 === right.topography) {
+			toCheck.push(right);
+		}
+	}
+	if (start.y > 0) {
+		const up = map[start.y - 1][start.x];
+		if (start.topography + 1 === up.topography) {
+			toCheck.push(up);
+		}
+	}
+	if (start.y < map.length - 1) {
+		const down = map[start.y + 1][start.x];
+		if (start.topography + 1 === down.topography) {
+			toCheck.push(down);
+		}
+	}
+	while (toCheck.length > 0) {
+		const next = toCheck.pop();
+		if (next) {
+			calculateScore(next, map).forEach((point) => ends.add(point));
+		}
+	}
+
+	return Array.from(ends);
 }
 
 export function part1(input: string): number {
@@ -91,24 +132,32 @@ export function part1(input: string): number {
 
 	const score = trailheads.reduce(
 		(total, head) => {
-			console.log("before", head);
-			console.log(
-				map.map((row) => row.map((c) => c.score).join(",")).join("\n"),
-			);
-			calculateScore(head, map);
-			console.log("after", head);
-			console.log(
-				map.map((row) => row.map((c) => c.score).join(",")).join("\n"),
-			);
-			return total + head.score;
+			const r = calculateScore(head, map);
+			return total + r.length;
 		},
 		0,
 	);
-	console.log(trailheads);
 	return score;
 }
 
 export function part2(input: string): number {
-	// TODO: Implement part 2 here.
-	return input.length;
+	const trailheads: Array<Point> = [];
+	const map: Array<Array<Point>> = input.split("\n").map((row, rowIndex) => {
+		return row.split("").map((char, colIndex) => {
+			const top = char == "." ? -1 : +char;
+			const point = new Point(colIndex, rowIndex, top);
+			if (char === "0") {
+				trailheads.push(point);
+			}
+			return point;
+		});
+	});
+
+	const score = trailheads.reduce(
+		(total, head) => {
+			return total + calculateTotalScore(head, map);
+		},
+		0,
+	);
+	return score;
 }

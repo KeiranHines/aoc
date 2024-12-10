@@ -17,7 +17,7 @@ Deno.test("Day 10 Part 1", () => {
 });
 
 Deno.test("Day 10 part 2", () => {
-	assertEquals(part2(input), 0);
+	assertEquals(part2(input), 81);
 });
 
 Deno.test("Day 10 simple path", () => {
@@ -53,4 +53,18 @@ Deno.test("Day 10 complex path", () => {
 9........0
 	`.trim();
 	assertEquals(part1(input), 7);
+});
+
+Deno.test("Day 10 part 1 sample", () => {
+	const input = `
+8901.123
+78121874
+8743.965
+96549874
+456789.3
+32.19.12
+.13298.1
+1.456732
+	`.trim();
+	assertEquals(part1(input), 5);
 });
