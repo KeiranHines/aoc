@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { part1, part2 } from "./day5.ts";
+import { part1, part2 } from "./day05.ts";
 
 const input = `
 47|53
@@ -38,4 +38,16 @@ Deno.test("Day 5 Part 1", () => {
 
 Deno.test("Day 5 part 2", () => {
 	assertEquals(part2(input), 123);
+});
+
+const realInput = await Deno.readTextFile(`inputs/day05`).catch(() => {
+	return "";
+}).then((i) => i.trim());
+
+Deno.bench("day 5 part 1", () => {
+	part1(realInput);
+});
+
+Deno.bench("day 5 part 2", () => {
+	part2(realInput);
 });

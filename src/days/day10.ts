@@ -34,33 +34,31 @@ class Point {
  * @param start The point to check from
  * @param map The map of points to find the next points in
  */
-function getNext(start: Point, map: Array<Array<Point>>): Array<Point> {
-	const toCheck = [];
+function* getNext(start: Point, map: Array<Array<Point>>): Generator<Point> {
 	if (start.x > 0) {
 		const left = map[start.y][start.x - 1];
 		if (start.topography + 1 === left.topography) {
-			toCheck.push(left);
+			yield left;
 		}
 	}
 	if (start.x < map[start.y].length - 1) {
 		const right = map[start.y][start.x + 1];
 		if (start.topography + 1 === right.topography) {
-			toCheck.push(right);
+			yield right;
 		}
 	}
 	if (start.y > 0) {
 		const up = map[start.y - 1][start.x];
 		if (start.topography + 1 === up.topography) {
-			toCheck.push(up);
+			yield up;
 		}
 	}
 	if (start.y < map.length - 1) {
 		const down = map[start.y + 1][start.x];
 		if (start.topography + 1 === down.topography) {
-			toCheck.push(down);
+			yield down;
 		}
 	}
-	return toCheck;
 }
 
 /**
@@ -78,12 +76,11 @@ function calculateUniqueRoutes(start: Point, map: Array<Array<Point>>): number {
 	}
 
 	const toCheck = getNext(start, map);
-
-	while (toCheck.length > 0) {
-		const next = toCheck.pop()!;
-		start.score += !next.seen
-			? calculateUniqueRoutes(next, map)
-			: next.score;
+	let next;
+	while (next = toCheck.next(), !next.done) {
+		start.score += !next.value.seen
+			? calculateUniqueRoutes(next.value, map)
+			: next.value.score;
 	}
 
 	return start.score;
@@ -105,14 +102,11 @@ function calculateUninqueEndpoints(
 	}
 	const ends: Set<Point> = new Set();
 	const toCheck = getNext(start, map);
-
-	while (toCheck.length > 0) {
-		const next = toCheck.pop();
-		if (next) {
-			calculateUninqueEndpoints(next, map).forEach((point) =>
-				ends.add(point)
-			);
-		}
+	let next;
+	while (next = toCheck.next(), !next.done) {
+		calculateUninqueEndpoints(next.value, map).forEach((point) =>
+			ends.add(point)
+		);
 	}
 
 	return Array.from(ends);

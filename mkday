@@ -3,4 +3,5 @@
 cp src/days/template.ts src/days/day$1.ts
 cp src/days/template_test.ts src/days/day$1_test.ts
 sed -i -e "s/template.ts/day$1.ts/g" src/days/day$1_test.ts
-sed -i -e "s/example/Day $1/g" src/days/day$1_test.ts
+sed -i -e "s/template_file/day$1/g" src/days/day$1_test.ts
+sed -i -e "s/template_name/Day $1/g" src/days/day$1_test.ts

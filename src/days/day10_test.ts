@@ -39,3 +39,15 @@ Deno.test("Day 10 less simple path", () => {
 	`.trim();
 	assertEquals(part1(input), 4);
 });
+
+const realInput = await Deno.readTextFile(`inputs/day10`).catch(() => {
+	return "";
+}).then((i) => i.trim());
+
+Deno.bench("Day 10 part 1", () => {
+	part1(realInput);
+});
+
+Deno.bench("Day 10 part 2", () => {
+	part2(realInput);
+});

@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { part1, part2 } from "./day3.ts";
+import { part1, part2 } from "./day03.ts";
 
 Deno.test("Day 3 Part 1", () => {
 	const input = `
@@ -13,4 +13,16 @@ Deno.test("Day 3 part 2", () => {
 xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
 	`.trim();
 	assertEquals(part2(input), 48);
+});
+
+const realInput = await Deno.readTextFile(`inputs/day03`).catch(() => {
+	return "";
+}).then((i) => i.trim());
+
+Deno.bench("day 3 part 1", () => {
+	part1(realInput);
+});
+
+Deno.bench("day 3 part 2", () => {
+	part2(realInput);
 });
