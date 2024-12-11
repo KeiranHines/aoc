@@ -29,14 +29,6 @@ function next(number: number) {
 	return [number * 2024];
 }
 
-function run(num: number, runs: number) {
-	let state = [num];
-	for (let i = 0; i < runs; i++) {
-		state = state.flatMap((number) => next(number));
-	}
-	return state;
-}
-
 function makeCountMap(stones: Array<number>) {
 	const counter: Map<number, number> = new Map();
 	for (const s of stones) {
@@ -65,13 +57,6 @@ function runIter(numbers: Array<number>, runs: number): number {
 }
 
 export function part1(input: string): number {
-	return input.split(" ").reduce(
-		(total, s) => total + run(+s, 25).length,
-		0,
-	);
-}
-
-export function part1_iter(input: string): number {
 	const stones = input.split(" ").map((s) => +s);
 	return runIter(stones, 25);
 }
