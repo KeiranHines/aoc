@@ -36,19 +36,8 @@ function run(num: number, runs: number) {
 	}
 	return state;
 }
-function makeCountMap(stones: Array<number>) {
-	const counter: { [key: string]: number } = {};
-	for (const s of stones) {
-		if (counter[s]) {
-			counter[s] = counter[s] + 1;
-		} else {
-			counter[s] = 1;
-		}
-	}
-	return counter;
-}
 
-function makeCountMap2(stones: Array<number>) {
+function makeCountMap(stones: Array<number>) {
 	const counter: Map<number, number> = new Map();
 	for (const s of stones) {
 		if (counter.has(s)) {
@@ -62,7 +51,7 @@ function makeCountMap2(stones: Array<number>) {
 }
 
 function runIter(numbers: Array<number>, runs: number): number {
-	let counter: Map<number, number> = makeCountMap2(numbers);
+	let counter: Map<number, number> = makeCountMap(numbers);
 	for (let i = 0; i < runs; ++i) {
 		const temp: Map<number, number> = new Map();
 		counter.forEach((v, stone) => {
