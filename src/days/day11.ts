@@ -82,6 +82,11 @@ export function part1(input: string): number {
 	);
 }
 
+export function part1_iter(input: string): number {
+	const stones = input.split(" ").map((s) => +s);
+	return runIter(stones, 25);
+}
+
 export function part2(input: string): number {
 	const stones = input.split(" ").map((s) => +s);
 	return runIter(stones, 75);
