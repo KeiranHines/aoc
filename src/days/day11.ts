@@ -17,7 +17,7 @@ if (import.meta.main) {
 }
 
 function next(number: number) {
-	if (number === 0) {
+	if (number == 0) {
 		return [1];
 	}
 	const digits = Math.floor(Math.log10(number) + 1);
@@ -29,25 +29,15 @@ function next(number: number) {
 	return [number * 2024];
 }
 
-function run(numbers: Array<number>, runs: number) {
-	let state = [...numbers];
+function run(num: number, runs: number) {
+	let state = [num];
 	for (let i = 0; i < runs; i++) {
 		state = state.flatMap((number) => next(number));
 	}
 	return state;
 }
-
-export function part1(input: string): number {
-	return input.split(" ").reduce(
-		(total, s) => total + run([+s], 25).length,
-		0,
-	);
-}
-
-export function part2(input: string): number {
-	let stones = input.split(" ").map((s) => +s);
-	stones = stones.flatMap((s) => run([s], 37));
-	const counter: { [key: number]: number } = {};
+function makeCountMap(stones: Array<number>) {
+	const counter: { [key: string]: number } = {};
 	for (const s of stones) {
 		if (counter[s]) {
 			counter[s] = counter[s] + 1;
@@ -55,11 +45,44 @@ export function part2(input: string): number {
 			counter[s] = 1;
 		}
 	}
-	const newStones = Array.from(new Set(stones));
-	return newStones.reduce(
-		(total, s) => total + run([s], 38).length * (counter[s] || 1),
+	return counter;
+}
+
+function makeCountMap2(stones: Array<number>) {
+	const counter: Map<number, number> = new Map();
+	for (const s of stones) {
+		if (counter.has(s)) {
+			//@ts-expect-error its fine
+			counter.set(s, counter.get(s) + 1);
+		} else {
+			counter.set(s, 1);
+		}
+	}
+	return counter;
+}
+
+function runIter(numbers: Array<number>, runs: number): number {
+	let counter: Map<number, number> = makeCountMap2(numbers);
+	for (let i = 0; i < runs; ++i) {
+		const temp: Map<number, number> = new Map();
+		counter.forEach((v, stone) => {
+			next(stone).forEach((n) => {
+				temp.set(n, (temp.get(n) || 0) + v);
+			});
+		});
+		counter = temp;
+	}
+	return counter.values().reduce((t, x) => t + x, 0);
+}
+
+export function part1(input: string): number {
+	return input.split(" ").reduce(
+		(total, s) => total + run(+s, 25).length,
 		0,
 	);
-	//stones = stones.flatMap((s) => run([s], 25));
-	return stones.length;
+}
+
+export function part2(input: string): number {
+	const stones = input.split(" ").map((s) => +s);
+	return runIter(stones, 75);
 }

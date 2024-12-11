@@ -9,10 +9,6 @@ Deno.test("Day 11 Part 1", () => {
 	assertEquals(part1(input), 55312);
 });
 
-Deno.test("Day 11 part 2", () => {
-	assertEquals(part2(input), 0);
-});
-
 const realInput = await Deno.readTextFile(`inputs/day11`).catch(() => {
 	return "";
 }).then((i) => i.trim());
