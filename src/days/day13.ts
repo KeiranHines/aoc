@@ -15,47 +15,34 @@ export async function main() {
 if (import.meta.main) {
 	await main();
 }
+function solveEq2(input: string, additional: number = 0) {
+	const search =
+		/A:.*?(\d+).*?(\d+)\n.*?B:.*?(\d+).*?(\d+)\n.*?e:.*?(\d+).*?(\d+)/g;
+	let total = 0;
+	let parts;
+	while (parts = search.exec(input), parts) {
+		const ax = +parts![1];
+		const ay = +parts![2];
+		const bx = +parts![3];
+		const by = +parts![4];
+		const px = +parts![5] + additional;
+		const py = +parts![6] + additional;
+		const i = (bx * py - by * px) / (ay * bx - ax * by);
+		const j = (px - i * ax) / bx;
+		if (
+			(px - i * ax) % bx == 0 &&
+			(bx * py - by * px) % (ay * bx - ax * by) == 0
+		) {
+			total += 3 * i + j;
+		}
+	}
+	return total;
+}
 
-class Button {
-	x: number;
-	y: number;
-	cost: number;
-	presses: number;
-	constructor(x: number, y: number, cost: number) {
-		this.x = x;
-		this.y = y;
-		this.cost = cost;
-		this.presses = 0;
-	}
-}
-function solveEq(input: string, additional: number = 0) {
-	const a_search = /A:.*?(\d+).*?(\d+)/g;
-	const b_search = /B:.*?(\d+).*?(\d+)/g;
-	const p_search = /Prize:.*?(\d+).*?(\d+)/g;
-	const aParts = a_search.exec(input);
-	const bParts = b_search.exec(input);
-	const pParts = p_search.exec(input);
-	const a = new Button(+aParts![1], +aParts![2], 3);
-	const b = new Button(+bParts![1], +bParts![2], 1);
-	const px = +pParts![1] + additional;
-	const py = +pParts![2] + additional;
-	const i = (b.x * py - b.y * px) / (a.y * b.x - a.x * b.y);
-	const j = (px - i * a.x) / b.x;
-	if (
-		(px - i * a.x) % b.x == 0 &&
-		(b.x * py - b.y * px) % (a.y * b.x - a.x * b.y) == 0
-	) {
-		return 3 * +i + j;
-	}
-	return 0;
-}
 export function part1(input: string): number {
-	return input.split("\n\n").reduce((total, i) => total + solveEq(i), 0);
+	return solveEq2(input);
 }
 
 export function part2(input: string): number {
-	return input.split("\n\n").reduce(
-		(total, i) => total + solveEq(i, 10000000000000),
-		0,
-	);
+	return solveEq2(input, 10000000000000);
 }
