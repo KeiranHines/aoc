@@ -74,93 +74,34 @@ function solvePrice(allPlots: Array<Plot>) {
 	return total;
 }
 
-function findGaps(
-	m: Map<number, Array<number>>,
-	alt: Map<number, Array<number>>,
-	h: boolean,
-): number {
-	let walls = 0;
-	const keys: Array<number> = [];
-	const values: Array<Array<number>> = [];
-	m.entries().forEach(([k, r]) => {
-		r.sort();
-		keys.push(k);
-		values.push(r);
-	});
-	values.forEach((row, index) => {
-		if (
-			values[index + 1] &&
-			values[index + 1][values[index + 1].length - 1] !=
-				row[row.length - 1]
-		) {
-			// End of the lines are different wall
-			walls++;
-		}
-		if (values[index + 1] && values[index + 1][0] != row[0]) {
-			// End of the lines are different wall
-			walls++;
-		}
-		//console.log(row);
-		let i = 0;
-		while (i < row.length - 1) {
-			let j = 1;
-			while (i + j <= row.length - 1) {
-				if (row[i] + j != row[i + j]) {
-					// gap break
-					//console.log(keys[index], "has gap");
-					const a = keys[index];
-					const b = row[i] + j;
-					//if (h) {
-					//} else {
-					//y = index;
-					//x = row[i] + j;
-					//}
-					let connected = 0;
-					if (m.get(a)?.includes(b - 1)) {
-						connected++;
-					}
-					if (m.get(a)?.includes(b + 1)) {
-						connected++;
-					}
-					if (m.get(a - 1)?.includes(b - 1)) {
-						connected++;
-					}
-					if (m.get(a - 1)?.includes(b)) {
-						connected++;
-					}
-					if (m.get(a - 1)?.includes(b + 1)) {
-						connected++;
-					}
-					if (m.get(a + 1)?.includes(b - 1)) {
-						connected++;
-					}
-					if (m.get(a + 1)?.includes(b)) {
-						connected++;
-					}
-					if (m.get(a + 1)?.includes(b + 1)) {
-						connected++;
-					}
-					if (connected == 5) {
-						walls += 2;
-					} else if (connected == 6) {
-						walls++;
-					} else if (connected >= 7) {
-						walls += 2;
-					} else if (connected == 4) {
-						walls++;
-					} else {
-						console.log("connected", connected, a, b);
-					}
-
-					break;
-				}
-				j++;
-			}
-			i += j;
-		}
-		//console.log(index, walls);
-	});
-	return walls;
+function findCorners(group: Array<Plot>, map: Array<Array<Plot>>): number {
+	return group.reduce((c, p) => {
+		// Outside easy corners
+		// E.g.
+		// BBB
+		// BAA
+		// BAA
+		// Check for top left a if it is not connected to something left and up
+		// its a corner not a continuation in that direction.
+		c += (!p.left && !p.up) ? 1 : 0;
+		c += (!p.right && !p.up) ? 1 : 0;
+		c += (!p.left && !p.down) ? 1 : 0;
+		c += (!p.right && !p.down) ? 1 : 0;
+		// Inside harder corners
+		// check diagonals in the map but not in the group when the two two
+		// 'L' adjacent ones exist.
+		// E.g.
+		//AA
+		//BA
+		// Check for B not being in this group.
+		c += p.left && p.up && !group.includes(map[p.y - 1][p.x - 1]) ? 1 : 0;
+		c += p.right && p.up && !group.includes(map[p.y - 1][p.x + 1]) ? 1 : 0;
+		c += p.left && p.down && !group.includes(map[p.y + 1][p.x - 1]) ? 1 : 0;
+		c += p.right && p.down && !group.includes(map[p.y + 1][p.x + 1])
+			? 1
+			: 0;
+		return c;
+	}, 0);
 }
 
 function solveDiscountPrice(allPlots: Array<Plot>, map: Array<Array<Plot>>) {
@@ -200,32 +141,39 @@ function solveDiscountPrice(allPlots: Array<Plot>, map: Array<Array<Plot>>) {
 				connected.push(point.right);
 			}
 		}
-		let walls = 4;
-		const yMap = new Map<number, Array<number>>();
-		const xMap = new Map<number, Array<number>>();
-		group.forEach((p) => {
-			if (!yMap.has(p.y)) {
-				yMap.set(p.y, []);
-			}
-			if (!xMap.has(p.x)) {
-				xMap.set(p.x, []);
-			}
-			yMap.get(p.y)?.push(p.x);
-			xMap.get(p.x)?.push(p.y);
-		});
-
-		const yWalls = findGaps(yMap, xMap, false);
-		walls += yWalls;
-		const xWalls = findGaps(xMap, yMap, false);
-		walls += xWalls;
-		if (walls % 2 != 0) {
-			console.log("Monkey patch for odd number of walls");
-			walls++;
-		}
-		total += area * walls;
-		//console.log(group[0].char, area, walls);
+		total += area * findCorners(group, map);
 	}
 	return total;
+}
+
+function connectPlots(plots: Array<Array<Plot>>) {
+	const allPlots = plots.flatMap((x) => x);
+	allPlots.forEach((plot) => {
+		plot.perim = 4; // Initial case. Remove for every join
+		if (plot.y > 0 && plots[plot.y - 1][plot.x].char == plot.char) {
+			plot.up = plots[plot.y - 1][plot.x];
+			plot.perim--;
+		}
+		if (
+			plot.y < plots.length - 1 &&
+			plots[plot.y + 1][plot.x].char == plot.char
+		) {
+			plot.down = plots[plot.y + 1][plot.x];
+			plot.perim--;
+		}
+		if (plot.x > 0 && plots[plot.y][plot.x - 1].char == plot.char) {
+			plot.left = plots[plot.y][plot.x - 1];
+			plot.perim--;
+		}
+		if (
+			plot.x < plots[plot.y].length - 1 &&
+			plots[plot.y][plot.x + 1].char == plot.char
+		) {
+			plot.right = plots[plot.y][plot.x + 1];
+			plot.perim--;
+		}
+	});
+	return allPlots;
 }
 
 export function part1(input: string): number {
@@ -234,34 +182,8 @@ export function part1(input: string): number {
 			new Plot(colIndex, rowIndex, char)
 		)
 	);
-	const allPlots = plots.flatMap((x) => x);
 	// Link all like plots
-	allPlots.forEach((plot) => {
-		let perim = 4;
-		if (plot.y > 0 && plots[plot.y - 1][plot.x].char == plot.char) {
-			plot.up = plots[plot.y - 1][plot.x];
-			perim--;
-		}
-		if (
-			plot.y < plots.length - 1 &&
-			plots[plot.y + 1][plot.x].char == plot.char
-		) {
-			plot.down = plots[plot.y + 1][plot.x];
-			perim--;
-		}
-		if (plot.x > 0 && plots[plot.y][plot.x - 1].char == plot.char) {
-			plot.left = plots[plot.y][plot.x - 1];
-			perim--;
-		}
-		if (
-			plot.x < plots[plot.y].length - 1 &&
-			plots[plot.y][plot.x + 1].char == plot.char
-		) {
-			plot.right = plots[plot.y][plot.x + 1];
-			perim--;
-		}
-		plot.perim = perim;
-	});
+	const allPlots = connectPlots(plots);
 	return solvePrice(allPlots);
 }
 
@@ -271,33 +193,6 @@ export function part2(input: string): number {
 			new Plot(colIndex, rowIndex, char)
 		)
 	);
-	const allPlots = plots.flatMap((x) => x);
-	// Link all like plots
-	allPlots.forEach((plot) => {
-		let perim = 4;
-		if (plot.y > 0 && plots[plot.y - 1][plot.x].char == plot.char) {
-			plot.up = plots[plot.y - 1][plot.x];
-			perim--;
-		}
-		if (
-			plot.y < plots.length - 1 &&
-			plots[plot.y + 1][plot.x].char == plot.char
-		) {
-			plot.down = plots[plot.y + 1][plot.x];
-			perim--;
-		}
-		if (plot.x > 0 && plots[plot.y][plot.x - 1].char == plot.char) {
-			plot.left = plots[plot.y][plot.x - 1];
-			perim--;
-		}
-		if (
-			plot.x < plots[plot.y].length - 1 &&
-			plots[plot.y][plot.x + 1].char == plot.char
-		) {
-			plot.right = plots[plot.y][plot.x + 1];
-			perim--;
-		}
-		plot.perim = perim;
-	});
+	const allPlots = connectPlots(plots);
 	return solveDiscountPrice(allPlots, plots);
 }
