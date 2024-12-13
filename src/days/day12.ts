@@ -32,23 +32,6 @@ class Plot {
 	}
 }
 
-function getPerim(plot: Plot): number {
-	let p = 0;
-	if (!plot.up) {
-		p++;
-	}
-	if (!plot.down) {
-		p++;
-	}
-	if (!plot.left) {
-		p++;
-	}
-	if (!plot.right) {
-		p++;
-	}
-	return p;
-}
-
 function solvePrice(allPlots: Array<Plot>) {
 	let total = 0;
 	while (allPlots.length > 0) {
@@ -59,7 +42,7 @@ function solvePrice(allPlots: Array<Plot>) {
 		while (connected.length > 0) {
 			const point = connected.pop()!;
 			allPlots.splice(allPlots.indexOf(point), 1);
-			perim += getPerim(point);
+			perim += point.perim!;
 			area++;
 			if (
 				point.up && allPlots.indexOf(point.up) > -1 &&
@@ -90,6 +73,96 @@ function solvePrice(allPlots: Array<Plot>) {
 	}
 	return total;
 }
+
+function findGaps(
+	m: Map<number, Array<number>>,
+	alt: Map<number, Array<number>>,
+	h: boolean,
+): number {
+	let walls = 0;
+	const keys: Array<number> = [];
+	const values: Array<Array<number>> = [];
+	m.entries().forEach(([k, r]) => {
+		r.sort();
+		keys.push(k);
+		values.push(r);
+	});
+	values.forEach((row, index) => {
+		if (
+			values[index + 1] &&
+			values[index + 1][values[index + 1].length - 1] !=
+				row[row.length - 1]
+		) {
+			// End of the lines are different wall
+			walls++;
+		}
+		if (values[index + 1] && values[index + 1][0] != row[0]) {
+			// End of the lines are different wall
+			walls++;
+		}
+		//console.log(row);
+		let i = 0;
+		while (i < row.length - 1) {
+			let j = 1;
+			while (i + j <= row.length - 1) {
+				if (row[i] + j != row[i + j]) {
+					// gap break
+					//console.log(keys[index], "has gap");
+					const a = keys[index];
+					const b = row[i] + j;
+					//if (h) {
+					//} else {
+					//y = index;
+					//x = row[i] + j;
+					//}
+					let connected = 0;
+					if (m.get(a)?.includes(b - 1)) {
+						connected++;
+					}
+					if (m.get(a)?.includes(b + 1)) {
+						connected++;
+					}
+					if (m.get(a - 1)?.includes(b - 1)) {
+						connected++;
+					}
+					if (m.get(a - 1)?.includes(b)) {
+						connected++;
+					}
+					if (m.get(a - 1)?.includes(b + 1)) {
+						connected++;
+					}
+					if (m.get(a + 1)?.includes(b - 1)) {
+						connected++;
+					}
+					if (m.get(a + 1)?.includes(b)) {
+						connected++;
+					}
+					if (m.get(a + 1)?.includes(b + 1)) {
+						connected++;
+					}
+					if (connected == 5) {
+						walls += 2;
+					} else if (connected == 6) {
+						walls++;
+					} else if (connected >= 7) {
+						walls += 2;
+					} else if (connected == 4) {
+						walls++;
+					} else {
+						console.log("connected", connected, a, b);
+					}
+
+					break;
+				}
+				j++;
+			}
+			i += j;
+		}
+		//console.log(index, walls);
+	});
+	return walls;
+}
+
 function solveDiscountPrice(allPlots: Array<Plot>, map: Array<Array<Plot>>) {
 	let total = 0;
 	while (allPlots.length > 0) {
@@ -127,67 +200,30 @@ function solveDiscountPrice(allPlots: Array<Plot>, map: Array<Array<Plot>>) {
 				connected.push(point.right);
 			}
 		}
-		let walls = 0;
-		const hasWalls = new Set();
+		let walls = 4;
+		const yMap = new Map<number, Array<number>>();
+		const xMap = new Map<number, Array<number>>();
 		group.forEach((p) => {
-			if (p.perim! < 5) {
-				/*// This one has an outer edge. Work out which line.
-				if (p.up === undefined && p.left === undefined) {
-					walls++;
-					hasWalls.add(p);
-				}
-				if (p.up === undefined && p.right === undefined) {
-					walls++;
-					hasWalls.add(p);
-				}
-				if (p.down === undefined && p.right === undefined) {
-					walls++;
-					hasWalls.add(p);
-				}
-				if (p.down === undefined && p.left === undefined) {
-					walls++;
-					hasWalls.add(p);
-				}
-
-				if (p.down === undefined && p.left === undefined) {
-					walls++;
-					hasWalls.add(p);
-				}*/
-				// Check for inside corners.
-				if (
-					p.y > 0 && p.x > 0 && map[p.y - 1][p.x - 1].char !== p.char
-				) {
-					walls++;
-					hasWalls.add(p);
-				}
-				if (
-					p.y > 0 && p.x < map[p.y - 1].length - 1 &&
-					map[p.y - 1][p.x + 1].char !== p.char
-				) {
-					walls++;
-					hasWalls.add(p);
-				}
-				if (
-					p.y < map.length - 1 && p.x < map[p.y + 1].length - 1 &&
-					map[p.y + 1][p.x + 1].char !== p.char
-				) {
-					walls++;
-					hasWalls.add(p);
-				}
-				if (
-					p.y < map.length - 1 && p.x > 0 &&
-					map[p.y + 1][p.x - 1].char !== p.char
-				) {
-					walls++;
-					hasWalls.add(p);
-				}
+			if (!yMap.has(p.y)) {
+				yMap.set(p.y, []);
 			}
+			if (!xMap.has(p.x)) {
+				xMap.set(p.x, []);
+			}
+			yMap.get(p.y)?.push(p.x);
+			xMap.get(p.x)?.push(p.y);
 		});
+
+		const yWalls = findGaps(yMap, xMap, false);
+		walls += yWalls;
+		const xWalls = findGaps(xMap, yMap, false);
+		walls += xWalls;
+		if (walls % 2 != 0) {
+			console.log("Monkey patch for odd number of walls");
+			walls++;
+		}
 		total += area * walls;
-		console.log(group.map((p) => [p.y, p.x]));
-		//@ts-expect-error testing
-		console.log("has walls", Array.from(hasWalls).map((p) => [p.y, p.x]));
-		console.log(group[0].char, area, walls);
+		//console.log(group[0].char, area, walls);
 	}
 	return total;
 }
@@ -201,24 +237,30 @@ export function part1(input: string): number {
 	const allPlots = plots.flatMap((x) => x);
 	// Link all like plots
 	allPlots.forEach((plot) => {
+		let perim = 4;
 		if (plot.y > 0 && plots[plot.y - 1][plot.x].char == plot.char) {
 			plot.up = plots[plot.y - 1][plot.x];
+			perim--;
 		}
 		if (
 			plot.y < plots.length - 1 &&
 			plots[plot.y + 1][plot.x].char == plot.char
 		) {
 			plot.down = plots[plot.y + 1][plot.x];
+			perim--;
 		}
 		if (plot.x > 0 && plots[plot.y][plot.x - 1].char == plot.char) {
 			plot.left = plots[plot.y][plot.x - 1];
+			perim--;
 		}
 		if (
 			plot.x < plots[plot.y].length - 1 &&
 			plots[plot.y][plot.x + 1].char == plot.char
 		) {
 			plot.right = plots[plot.y][plot.x + 1];
+			perim--;
 		}
+		plot.perim = perim;
 	});
 	return solvePrice(allPlots);
 }

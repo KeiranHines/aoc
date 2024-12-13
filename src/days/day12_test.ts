@@ -22,6 +22,16 @@ Deno.test("Day 12 part 2", () => {
 	assertEquals(part2(input), 1206);
 });
 
+Deno.test("Day 12 test grid", () => {
+	const i = `
+xxxx
+xxax
+xaxx
+xxxx
+`.trim();
+	assertEquals(part2(i), 176);
+});
+
 const realInput = await Deno.readTextFile(`inputs/day12`).catch(() => {
 	return "";
 }).then((i) => i.trim());

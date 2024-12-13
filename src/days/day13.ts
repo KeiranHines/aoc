@@ -29,10 +29,7 @@ function solveEq2(input: string, additional: number = 0) {
 		const py = +parts![6] + additional;
 		const i = (bx * py - by * px) / (ay * bx - ax * by);
 		const j = (px - i * ax) / bx;
-		if (
-			(px - i * ax) % bx == 0 &&
-			(bx * py - by * px) % (ay * bx - ax * by) == 0
-		) {
+		if (i % 1 == 0 && j % 1 == 0) {
 			total += 3 * i + j;
 		}
 	}
