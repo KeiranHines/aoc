@@ -64,35 +64,7 @@ function calculateQuadrants(robots: Array<Robot>, gx: number, gy: number) {
 	return quad;
 }
 
-function findLine(robots: Array<Robot>, gx: number, gy: number) {
-	const yMap = new Map();
-	const xMap = new Map();
-	robots.forEach((r) => {
-		if (!yMap.has(r.y)) {
-			yMap.set(r.y, 0);
-		}
-		yMap.set(r.y, yMap.get(r.y) + 1);
-		if (!xMap.has(r.x)) {
-			xMap.set(r.x, 0);
-		}
-		xMap.set(r.x, yMap.get(r.x) + 1);
-	});
-	for (const v of yMap.values()) {
-		if (v >= gx / 4) {
-			return true;
-		}
-	}
-	for (const v of xMap.values()) {
-		if (v >= gy / 4) {
-			return true;
-		}
-	}
-	return false;
-}
-
-function printGrid(robots: Array<Robot>, gx: number, gy: number, char = ".") {
-	const midHoz = Math.floor(gy / 2);
-	const midVert = Math.floor(gx / 2);
+function gridString(robots: Array<Robot>, gx: number, gy: number, char = ".") {
 	const grid: Array<Array<number | string>> = [];
 	for (let y = 0; y < gy; y++) {
 		grid.push(Array(gx).fill(char));
@@ -106,8 +78,7 @@ function printGrid(robots: Array<Robot>, gx: number, gy: number, char = ".") {
 			grid[r.y][r.x] = grid[r.y][r.x] + 1;
 		}
 	});
-	grid.forEach((line) => line[midVert] = " ");
-	grid.forEach((line, i) => console.log(i == midHoz ? "" : line.join("")));
+	return grid.map((line) => line.join("")).join("\n");
 }
 
 export function part1(input: string, gx = 101, gy = 103, count = 100): number {
@@ -127,9 +98,7 @@ export function part1(input: string, gx = 101, gy = 103, count = 100): number {
 	}
 
 	calculateFinalPositions(robots, gx, gy);
-	printGrid(robots, gx, gy);
 	const quad = calculateQuadrants(robots, gx, gy);
-	console.log(quad);
 	return quad.reduce((t, q) => t * q, 1);
 }
 
@@ -147,6 +116,8 @@ export function part2(
 	});
 
 	let i = 0;
+	const treeTop =
+		/ {4}\d {4}.*\n.*? {3}\d{3} {3}.*\n.*? {2}\d{5} {2}.*\n.*? \d{7} .*\n.*?\d{9}/gm;
 	while (true) {
 		i++;
 		robots.forEach((r) => {
@@ -154,11 +125,8 @@ export function part2(
 			r.y += r.vy;
 		});
 		calculateFinalPositions(robots, gx, gy);
-		if (findLine(robots, gx, gy)) {
-			printGrid(robots, gx, gy, " ");
-			prompt("Run " + i);
+		if (treeTop.test(gridString(robots, gx, gy, " "))) {
+			return i;
 		}
 	}
-
-	return 0;
 }
