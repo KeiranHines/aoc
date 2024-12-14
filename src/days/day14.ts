@@ -31,12 +31,12 @@ class Robot {
 
 function calculateFinalPositions(robots: Array<Robot>, gx: number, gy: number) {
 	robots.forEach((r) => {
-		while (r.x < 0) {
-			r.x += gx;
+		if (r.x < 0) {
+			r.x = gx - -r.x % gx;
 		}
 		r.x = r.x % gx;
-		while (r.y < 0) {
-			r.y += gy;
+		if (r.y < 0) {
+			r.y = gy - -r.y % gy;
 		}
 		r.y = r.y % gy;
 	});
