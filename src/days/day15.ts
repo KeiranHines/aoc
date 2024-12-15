@@ -8,7 +8,7 @@ export async function main() {
 		Deno.exit(1);
 	}).then((i) => i.trim());
 	day = day.replace("day", "");
-	//console.log(`Day ${day} part 1 answer is: `, part1(input));
+	console.log(`Day ${day} part 1 answer is: `, part1(input));
 	console.log(`Day ${day} part 2 answer is: `, part2(input));
 }
 
@@ -99,7 +99,6 @@ function shiftUp(
 		map[y][x] = ".";
 		return true;
 	}
-	console.log("missed a case going up");
 	return false;
 }
 function shiftDown(
@@ -167,9 +166,6 @@ function shiftDown(
 		map[y][x] = ".";
 		return true;
 	}
-	console.log("missed a case going down", y, x);
-	map.forEach((r) => console.log(r.join("")));
-	Deno.exit(1);
 	return false;
 }
 function shiftLeft(
@@ -178,7 +174,6 @@ function shiftLeft(
 	y: number,
 	boxSymbols = "O",
 ): boolean {
-	const o = map.map((r) => [...r]);
 	if (x === 0) {
 		return false;
 	}
@@ -211,14 +206,6 @@ function shiftLeft(
 			return true;
 		}
 	}
-	console.log("missed a case going left", y, x);
-	o.forEach((r, i) =>
-		console.log(String(i).padStart(2, "0"), ":", r.join(""))
-	);
-	map.forEach((r, i) =>
-		console.log(String(i).padStart(2, "0"), ":", r.join(""))
-	);
-	Deno.exit(1);
 	return false;
 }
 function shiftRight(
@@ -258,7 +245,6 @@ function shiftRight(
 			return true;
 		}
 	}
-	console.log("missed a case going right");
 	return false;
 }
 
@@ -271,11 +257,6 @@ function simulate(
 	let x = start[1];
 	let y = start[0];
 	moves.forEach((m) => {
-		const initBoxCount = map.reduce(
-			(t, r) => t + r.filter((c) => boxSymbols.includes(c)).length,
-			0,
-		);
-		const o = map.map((r) => [...r]);
 		switch (m) {
 			case "^":
 				if (shiftUp(map, x, y, boxSymbols)) {
@@ -301,47 +282,6 @@ function simulate(
 				break;
 			default:
 				console.log("error default case", m);
-		}
-		const fBoxCount = map.reduce(
-			(t, r) => t + r.filter((c) => boxSymbols.includes(c)).length,
-			0,
-		);
-		const atCount = map.reduce(
-			(t, r) => t + r.filter((c) => c == "@").length,
-			0,
-		);
-		if (map[y][x] != "@") {
-			console.log("start position isn't where it should be");
-			o.forEach((r, i) =>
-				console.log(String(i).padStart(2, "0"), ":", r.join(""))
-			);
-			console.log("Move", m, ":", x, y, ":");
-			map.forEach((r, i) =>
-				console.log(String(i).padStart(2, "0"), ":", r.join(""))
-			);
-			Deno.exit(1);
-		}
-		if (atCount > 1) {
-			console.log("Too many start positions");
-			o.forEach((r, i) =>
-				console.log(String(i).padStart(2, "0"), ":", r.join(""))
-			);
-			console.log("Move", m, ":", x, y, ":");
-			map.forEach((r, i) =>
-				console.log(String(i).padStart(2, "0"), ":", r.join(""))
-			);
-			Deno.exit(1);
-		}
-		if (initBoxCount != fBoxCount) {
-			console.log("a Box went missing");
-			o.forEach((r, i) =>
-				console.log(String(i).padStart(2, "0"), ":", r.join(""))
-			);
-			console.log("Move", m, ":", x, y, ":");
-			map.forEach((r, i) =>
-				console.log(String(i).padStart(2, "0"), ":", r.join(""))
-			);
-			Deno.exit(1);
 		}
 	});
 }
