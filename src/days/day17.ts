@@ -312,16 +312,14 @@ export function part2(input: string): number {
 		if (match) {
 			return i;
 		}
-		const shortC = computer.out.slice(1);
-		const shortI = instructions.slice(1);
-		for (let j = shortC.length; j >= 0; j--) {
-			if (shortC[j] != shortI[j]) {
-				// This seems to keep the last number the same.
-				console.log("skipping");
-				i = i * 4;
-				console.log(computer.out.join(","));
-				break;
-			}
+		if (
+			computer.out[instructions.length - 1] !=
+				instructions[instructions.length - 1]
+		) {
+			// This seems to keep the last number the same.
+			console.log("skipping");
+			i = i * 4;
+			console.log(computer.out.join(","));
 		}
 	}
 	return 0;
