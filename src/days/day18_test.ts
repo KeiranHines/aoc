@@ -33,8 +33,8 @@ Deno.test("Day 18 Part 1", () => {
 	assertEquals(part1(input, 12, 6, 6), 22);
 });
 
-Deno.test("Day 18 part 2", () => {
-	assertEquals(part2(input), 0);
+Deno.test("Day 18 Part 2", () => {
+	assertEquals(part2(input, 6, 6), "6,1");
 });
 
 const realInput = await Deno.readTextFile(`inputs/day18`).catch(() => {
@@ -42,7 +42,7 @@ const realInput = await Deno.readTextFile(`inputs/day18`).catch(() => {
 }).then((i) => i.trim());
 
 Deno.bench("Day 18 part 1", () => {
-	part1(realInput, 1024, 70, 70);
+	part1(realInput);
 });
 
 Deno.bench("Day 18 part 2", () => {
