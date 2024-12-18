@@ -11,7 +11,7 @@ export async function main() {
 	}).then((i) => i.trim());
 	day = day.replace("day", "");
 	console.log(`Day ${day} part 1 answer is: `, part1(input));
-	console.log(`Day ${day} part 2 answer is: `, part2a(input));
+	console.log(`Day ${day} part 2 answer is: `, part2(input));
 }
 
 if (import.meta.main) {
@@ -51,18 +51,6 @@ class OptCodeComputer {
 		}
 		return operand;
 	};
-	comboOperandString = (operand: number) => {
-		if (operand === 4) {
-			return "A";
-		}
-		if (operand === 5) {
-			return "B";
-		}
-		if (operand === 6) {
-			return "C";
-		}
-		return "" + operand;
-	};
 
 	reset = (a: number) => {
 		this.A = a;
@@ -70,80 +58,6 @@ class OptCodeComputer {
 		this.C = 0;
 
 		this.out = [];
-	};
-
-	findADivisor = (instructions: Array<Number>) => {
-		const outs = [];
-		let firstAWrite: number;
-		for (let i = 0; i < instructions.length; i++) {
-			if (i % 2 == 0 && instructions[i] == OptCode.out) {
-				outs.push(instructions[i + 1]);
-				if (instructions[i + 1] == 4) {
-					firstAWrite = i;
-					break;
-				}
-			}
-		}
-		// Outs now contains all the outs up until the first time an operation with A
-		// is written. Use that to find a starting condition for A
-	};
-
-	runToOutLimit = (instructions: Array<number>, limit: number) => {
-		let pointer = 0;
-		while (pointer < instructions.length) {
-			const optcode = instructions[pointer];
-			switch (optcode) {
-				case OptCode.adv:
-					this.A = Math.trunc(
-						this.A /
-							2 ** this.comboOperand(instructions[++pointer]),
-					);
-					pointer++;
-					break;
-				case OptCode.bxl:
-					this.B = this.B ^ instructions[++pointer];
-					pointer++;
-					break;
-				case OptCode.bst:
-					this.B = this.comboOperand(instructions[++pointer]) % 8;
-					pointer++;
-					break;
-				case OptCode.jnz:
-					if (this.A === 0) {
-						pointer += 2;
-						break;
-					}
-					pointer = instructions[++pointer];
-					break;
-				case OptCode.bxc:
-					this.B = this.B ^ this.C;
-					pointer += 2;
-					break;
-				case OptCode.out:
-					this.out.push(
-						this.comboOperand(instructions[++pointer]) % 8,
-					);
-					if (this.out.length > limit) {
-						return;
-					}
-					pointer++;
-					break;
-				case OptCode.bdv:
-					this.B = Math.trunc(
-						this.A /
-							2 ** this.comboOperand(instructions[++pointer]),
-					);
-					pointer++;
-					break;
-				case OptCode.cdv:
-					this.C = Math.trunc(
-						this.A /
-							2 ** this.comboOperand(instructions[++pointer]),
-					);
-					pointer++;
-					break;
-			}
-		}
 	};
 
 	run = (instructions: Array<number>) => {
@@ -174,7 +88,7 @@ class OptCodeComputer {
 					pointer = instructions[++pointer];
 					break;
 				case OptCode.bxc:
-					this.B = this.B ^ this.C;
+					this.B = Number(BigInt(this.B) ^ BigInt(this.C));
 					pointer += 2;
 					break;
 				case OptCode.out:
@@ -200,76 +114,6 @@ class OptCodeComputer {
 			}
 		}
 	};
-	runSolve = (instructions: Array<number>): boolean => {
-		let pointer = 0;
-		while (pointer < instructions.length) {
-			const optcode = instructions[pointer];
-			switch (optcode) {
-				case OptCode.adv:
-					this.A = Math.trunc(
-						this.A /
-							2 ** this.comboOperand(instructions[++pointer]),
-					);
-					pointer++;
-					break;
-				case OptCode.bxl:
-					this.B = this.B ^ instructions[++pointer];
-					pointer++;
-					break;
-				case OptCode.bst:
-					this.B = this.comboOperand(instructions[++pointer]) % 8;
-					pointer++;
-					break;
-				case OptCode.jnz:
-					if (this.A === 0) {
-						pointer += 2;
-						break;
-					}
-					pointer = instructions[++pointer];
-					break;
-				case OptCode.bxc:
-					this.B = this.B ^ this.C;
-					pointer += 2;
-					break;
-				case OptCode.out: {
-					this.out.push(
-						this.comboOperand(instructions[++pointer]) % 8,
-					);
-					let match = true;
-					if (this.out.length > instructions.length) {
-						return false;
-					}
-					for (let i = 0; i < this.out.length; i++) {
-						if (this.out[i] != instructions[i]) {
-							match = false;
-							break;
-						}
-					}
-					if (!match) {
-						return false;
-					}
-					pointer++;
-					break;
-				}
-				case OptCode.bdv:
-					this.B = Math.trunc(
-						this.A /
-							2 ** this.comboOperand(instructions[++pointer]),
-					);
-					pointer++;
-					break;
-				case OptCode.cdv:
-					this.C = Math.trunc(
-						this.A /
-							2 ** this.comboOperand(instructions[++pointer]),
-					);
-					pointer++;
-					break;
-			}
-		}
-
-		return this.out.length == instructions.length;
-	};
 }
 
 export function part1(input: string): string {
@@ -282,117 +126,35 @@ export function part1(input: string): string {
 	return computer.out.join(",");
 }
 
-export function part2a(input: string): number {
-	const [registers, program] = input.split("\n\n");
-	const [a, b, c] = registers.split("\n").map((line) => +line.split(": ")[1]);
-	const computer = new OptCodeComputer(a, b, c);
-	const instructions = program.split(": ")[1].split(",").map((o) => +o);
-	let digits = instructions.length - 1;
-	let total = 0;
-	while (digits >= 0) {
-		let match = false;
-		for (let i = 0; i < 8; i++) {
-			const next = (total * 8) + i;
-			computer.reset(next);
-			computer.run(instructions);
-			console.log(
-				computer.out.join(""),
-				instructions.slice(digits).join(""),
-			);
-			if (
-				computer.out.join("") ==
-					instructions.slice(digits).join("")
-			) {
-				console.log(
-					"match",
-					digits,
-					computer.out.join(""),
-					next,
-				);
-				total = next;
-				digits--;
-				computer.reset(total);
-				computer.run(instructions);
-				console.log(
-					"total is now",
-					total,
-					"output now starts at",
-					computer.out.join(""),
-				);
-				match = true;
-				break;
+function solve(
+	c: OptCodeComputer,
+	instructions: Array<number>,
+	digits: number,
+	total: number,
+): number | undefined {
+	for (let i = 0; i < 8; i++) {
+		const next = (total * 8) + i;
+		c.reset(next);
+		c.run(instructions);
+
+		if (instructions.slice(digits).every((v, i) => c.out[i] == v)) {
+			if (digits == 0) {
+				return next;
+			}
+			const result = solve(c, instructions, digits - 1, next);
+			if (result) {
+				return result;
 			}
 		}
-		if (!match) {
-			return 0;
-		}
 	}
-
-	return 0;
+	return undefined;
 }
+
 export function part2(input: string): number {
 	const [registers, program] = input.split("\n\n");
 	const [a, b, c] = registers.split("\n").map((line) => +line.split(": ")[1]);
 	const computer = new OptCodeComputer(a, b, c);
 	const instructions = program.split(": ")[1].split(",").map((o) => +o);
-	// TODO Improve this factor so it scales up when we are under.
-	const lowerLimit = 8 ** (instructions.length - 1);
-	const upperLimit = 8 ** (instructions.length) - 1;
-	console.log(lowerLimit, upperLimit, 321368929975);
-	let digits = 2;
-	for (let i = a; i <= upperLimit; i++) {
-		if (i % 10_000_000 == 0) {
-			console.log(
-				i,
-				(i * 100) / (upperLimit - lowerLimit),
-				"%",
-				computer.out.join(","),
-			);
-		}
-		computer.reset(i);
-		computer.run(instructions);
-		let match = true;
-		for (let j = 0; j < computer.out.length; j++) {
-			if (computer.out[j] != instructions[j]) {
-				match = false;
-				break;
-			}
-		}
-		if (match) {
-			return i;
-		}
-		const shortC = computer.out.slice(1, digits);
-		const shortI = instructions.slice(1, digits);
-		match = true;
-		for (let j = 0; j < shortC.length; j++) {
-			if (shortC[j] != shortI[j]) {
-				match = false;
-				break;
-			}
-		}
-		if (match) {
-			// This seems to keep the last number the same.
-			const x = (i * 8) - 1;
-			if (x < upperLimit) {
-				i = x;
-				console.log("skipping", i);
-			} else {
-				console.log("failed to skip");
-			}
-			i = x < upperLimit ? x : i;
-			console.log(i, computer.out.slice(1, digits).join(","), digits);
-			digits++;
-		}
-		//else if (
-		//	computer.out[instructions.length - 2] !=
-		//		instructions[instructions.length - 2]
-		//) {
-		// This seems to keep the last number the same.
-		//	console.log("advanced skipping", i);
-		//	const x = i + lowerLimit;
-		//	i = x < upperLimit ? x : i;
-		//	console.log(i, computer.out.slice(-3).join(","));
-		//}
-	}
-	return 0;
+
+	return solve(computer, instructions, instructions.length - 1, 0)!;
 }
