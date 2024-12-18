@@ -11,7 +11,7 @@ export async function main() {
 	}).then((i) => i.trim());
 	day = day.replace("day", "");
 	console.log(`Day ${day} part 1 answer is: `, part1(input));
-	console.log(`Day ${day} part 2 answer is: `, part2(input));
+	console.log(`Day ${day} part 2 answer is: `, part2a(input));
 }
 
 if (import.meta.main) {
@@ -282,6 +282,54 @@ export function part1(input: string): string {
 	return computer.out.join(",");
 }
 
+export function part2a(input: string): number {
+	const [registers, program] = input.split("\n\n");
+	const [a, b, c] = registers.split("\n").map((line) => +line.split(": ")[1]);
+	const computer = new OptCodeComputer(a, b, c);
+	const instructions = program.split(": ")[1].split(",").map((o) => +o);
+	let digits = instructions.length - 1;
+	let total = 0;
+	while (digits >= 0) {
+		let match = false;
+		for (let i = 0; i < 8; i++) {
+			const next = (total * 8) + i;
+			computer.reset(next);
+			computer.run(instructions);
+			console.log(
+				computer.out.join(""),
+				instructions.slice(digits).join(""),
+			);
+			if (
+				computer.out.join("") ==
+					instructions.slice(digits).join("")
+			) {
+				console.log(
+					"match",
+					digits,
+					computer.out.join(""),
+					next,
+				);
+				total = next;
+				digits--;
+				computer.reset(total);
+				computer.run(instructions);
+				console.log(
+					"total is now",
+					total,
+					"output now starts at",
+					computer.out.join(""),
+				);
+				match = true;
+				break;
+			}
+		}
+		if (!match) {
+			return 0;
+		}
+	}
+
+	return 0;
+}
 export function part2(input: string): number {
 	const [registers, program] = input.split("\n\n");
 	const [a, b, c] = registers.split("\n").map((line) => +line.split(": ")[1]);
@@ -290,12 +338,13 @@ export function part2(input: string): number {
 	// TODO Improve this factor so it scales up when we are under.
 	const lowerLimit = 8 ** (instructions.length - 1);
 	const upperLimit = 8 ** (instructions.length) - 1;
-	console.log(lowerLimit, upperLimit);
-	for (let i = lowerLimit; i <= upperLimit; i++) {
+	console.log(lowerLimit, upperLimit, 321368929975);
+	let digits = 2;
+	for (let i = a; i <= upperLimit; i++) {
 		if (i % 10_000_000 == 0) {
 			console.log(
 				i,
-				((i - lowerLimit) * 100) / (upperLimit - lowerLimit),
+				(i * 100) / (upperLimit - lowerLimit),
 				"%",
 				computer.out.join(","),
 			);
@@ -312,15 +361,38 @@ export function part2(input: string): number {
 		if (match) {
 			return i;
 		}
-		if (
-			computer.out[instructions.length - 1] !=
-				instructions[instructions.length - 1]
-		) {
-			// This seems to keep the last number the same.
-			console.log("skipping");
-			i = i * 4;
-			console.log(computer.out.join(","));
+		const shortC = computer.out.slice(1, digits);
+		const shortI = instructions.slice(1, digits);
+		match = true;
+		for (let j = 0; j < shortC.length; j++) {
+			if (shortC[j] != shortI[j]) {
+				match = false;
+				break;
+			}
 		}
+		if (match) {
+			// This seems to keep the last number the same.
+			const x = (i * 8) - 1;
+			if (x < upperLimit) {
+				i = x;
+				console.log("skipping", i);
+			} else {
+				console.log("failed to skip");
+			}
+			i = x < upperLimit ? x : i;
+			console.log(i, computer.out.slice(1, digits).join(","), digits);
+			digits++;
+		}
+		//else if (
+		//	computer.out[instructions.length - 2] !=
+		//		instructions[instructions.length - 2]
+		//) {
+		// This seems to keep the last number the same.
+		//	console.log("advanced skipping", i);
+		//	const x = i + lowerLimit;
+		//	i = x < upperLimit ? x : i;
+		//	console.log(i, computer.out.slice(-3).join(","));
+		//}
 	}
 	return 0;
 }
