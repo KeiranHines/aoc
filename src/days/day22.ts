@@ -98,23 +98,17 @@ export function part2(input: string): number {
 	const nums = input.split("\n").map((n) => +n);
 	const [prices, deltas] = calcPriceAndDelta(nums);
 	let max = 0;
-	for (let i = 9; i >= 0; i--) {
-		let c = prices[0].indexOf(i);
-		while (c != -1) {
-			if (c > 3) {
-				const local = calcScore(
-					deltas[0][c - 3],
-					deltas[0][c - 2],
-					deltas[0][c - 1],
-					deltas[0][c],
-					prices,
-					deltas,
-				);
-				if (local > max) {
-					max = local;
-				}
-			}
-			c = prices[0].indexOf(i, c + 1);
+	for (let i = 3; i < deltas[0].length; i++) {
+		const local = calcScore(
+			deltas[0][i - 3],
+			deltas[0][i - 2],
+			deltas[0][i - 1],
+			deltas[0][i],
+			prices,
+			deltas,
+		);
+		if (local > max) {
+			max = local;
 		}
 	}
 	return max;
