@@ -8,8 +8,8 @@ export async function main() {
 		Deno.exit(1);
 	}).then((i) => i.trim());
 	day = day.replace("day", "");
-	//console.log(`Day ${day} part 1 answer is: `, part1(input));
-	console.log(`Day ${day} part 2 answer is: `, part2(input));
+	console.log(`Day ${day} part 1 answer is: `, part1(input));
+	//console.log(`Day ${day} part 2 answer is: `, part2(input));
 }
 
 if (import.meta.main) {
@@ -21,10 +21,14 @@ export function part1(input: string): number {
 	const options: Map<number, Array<string>> = new Map();
 	let longest = 0;
 	const ts = towels.split(", ");
+	const byLetter: Map<string, Array<string>> = new Map();
 	ts.forEach((t) => {
 		if (!options.has(t.length)) {
 			options.set(t.length, []);
 		}
+		const bl = byLetter.get(t[0]) || [];
+		bl.push(t);
+		byLetter.set(t[0], bl);
 		if (t.length > longest) {
 			longest = t.length;
 		}
@@ -45,13 +49,35 @@ export function part1(input: string): number {
 			}
 		}
 	}
+	const sorted: Map<string, Array<string>> = new Map();
+	keep.forEach((k) => {
+		if (!sorted.has(k[0])) {
+			sorted.set(k[0], []);
+		}
+		sorted.get(k[0])?.push(k);
+	});
 
 	r = new RegExp(`^(${keep.join("|")})+$`, "g");
 
 	const tests = orders.split("\n");
 	return tests.filter((t, i) => {
 		console.log(i);
-		return t.matchAll(r).toArray().length > 0;
+		const t1 = new Date();
+		const x = t.matchAll(r).toArray().length > 0;
+		const t2 = new Date();
+		const x2 = matchSingle(sorted, t);
+		const t3 = new Date();
+		const x3 = matchSingle(byLetter, t);
+		const t4 = new Date();
+		console.log(
+			"first took",
+			t2.getTime() - t1.getTime(),
+			"Second took:",
+			t3.getTime() - t2.getTime(),
+			"Third took:",
+			t4.getTime() - t3.getTime(),
+		);
+		return x;
 	}).length;
 }
 
@@ -69,6 +95,25 @@ function match(options: Map<string, Array<string>>, input: string): number {
 		}
 	}
 	return count;
+}
+function matchSingle(
+	options: Map<string, Array<string>>,
+	input: string,
+): boolean {
+	if (options.has(input[0])) {
+		for (const o of options.get(input[0])!) {
+			if (input.startsWith(o)) {
+				if (input == o) {
+					return true;
+				} else {
+					if (match(options, input.slice(o.length))) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }
 
 function findAdditionalMatches(
