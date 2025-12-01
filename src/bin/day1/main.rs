@@ -51,9 +51,7 @@ fn part1(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
 fn part2(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
     let mut zero_count = 0u32;
     for r in rotations {
-        print!("Intitial {initial} r {} ", r.scalar);
         let (i, zeros) = r.effect(initial);
-        println!("Zeros from pass: {zeros}");
         initial = i;
         zero_count += zeros as u32;
     }
