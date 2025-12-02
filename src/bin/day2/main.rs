@@ -44,10 +44,6 @@ fn part1(ranges: Vec<Range>) -> u64 {
                 total += i;
             }
         }
-        println!(
-            "min: {} max: {} count: {count} total: {total}",
-            r.min_str, r.max_str
-        );
     }
     total
 }
