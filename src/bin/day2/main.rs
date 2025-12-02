@@ -35,12 +35,10 @@ fn parse(contents: &str) -> Vec<Range> {
 fn part1(ranges: Vec<Range>) -> u64 {
     let mut total = 0u64;
     for r in ranges {
-        let mut count = 0;
         for i in r.min_num..=r.max_num {
             let st = i.to_string();
             let mid = st.len() / 2;
             if st[..mid] == st[mid..] {
-                count += 1;
                 total += i;
             }
         }
