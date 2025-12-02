@@ -1,4 +1,4 @@
-use std::fs;
+use std::{collections::HashMap, fs};
 
 use fancy_regex::Regex;
 
@@ -51,7 +51,19 @@ fn part2(ranges: Vec<Range>) -> u64 {
     let mut total = 0u64;
     for r in ranges {
         for i in r.min_num..=r.max_num {
-            if re.is_match(&i.to_string()).expect("no match") {
+            let st = i.to_string();
+            let mut unique = HashMap::new();
+            for c in st.chars() {
+                let count = unique.get(&c).unwrap_or_else(|| &0);
+                unique.insert(c, count + 1);
+            }
+            let mut duplicates = true;
+            for count in unique.values() {
+                if *count < 2 {
+                    duplicates = false;
+                }
+            }
+            if duplicates && re.is_match(&i.to_string()).expect("no match") {
                 total += i;
             }
         }
