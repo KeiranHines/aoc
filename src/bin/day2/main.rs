@@ -62,39 +62,49 @@ fn part1(ranges: Vec<Range>) -> u64 {
     total
 }
 
-fn part2(ranges: Vec<Range>) -> u64 {
-    let re = Regex::new(r"^(\d+?)\1+$").unwrap();
-    let mut total = 0u64;
+async fn part2(ranges: Vec<Range>) -> u64 {
+    let mut final_total = 0u64;
+    let mut handles = Vec::new();
     for r in ranges {
-        for i in r.min_num..=r.max_num {
-            let st = i.to_string();
-            let mut unique = HashMap::new();
-            for c in st.chars() {
-                let count = unique.get(&c).unwrap_or_else(|| &0);
-                unique.insert(c, count + 1);
-            }
-            let mut duplicates = true;
-            for count in unique.values() {
-                if *count < 2 {
-                    duplicates = false;
+        let handle = tokio::task::spawn(async move {
+            let re = Regex::new(r"^(\d+?)\1+$").unwrap();
+            let mut total = 0u64;
+            for i in r.min_num..=r.max_num {
+                let st = i.to_string();
+                let mut unique = HashMap::new();
+                for c in st.chars() {
+                    let count = unique.get(&c).unwrap_or_else(|| &0);
+                    unique.insert(c, count + 1);
+                }
+                let mut duplicates = true;
+                for count in unique.values() {
+                    if *count < 2 {
+                        duplicates = false;
+                    }
+                }
+                if duplicates && re.is_match(&st).expect("no match") {
+                    total += i;
                 }
             }
-            if duplicates && re.is_match(&st).expect("no match") {
-                total += i;
-            }
-        }
+            total
+        });
+        handles.push(handle);
     }
-    total
+    for handle in handles {
+        final_total += handle.await.expect("error");
+    }
+    final_total
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day2.txt")?;
     let ranges = parse(&contents);
     let mut start = Instant::now();
     let p1 = part1(ranges.clone());
     let p1t = start.elapsed();
     start = Instant::now();
-    let p2 = part2(ranges);
+    let p2 = part2(ranges).await;
     let p2t = start.elapsed();
     println!("Part 1: {p1}, Part 2: {p2}");
     println!("Part 1: {p1t:?}, Part 2: {p2t:?}");
