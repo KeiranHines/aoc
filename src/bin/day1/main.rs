@@ -18,7 +18,7 @@ impl Rotation {
         if self.scalar < 0 {
             if position == 0 {
                 zeros = (new_pos.abs() - position as i32) / 100;
-            } else if self.scalar.abs() as i32 >= position as i32 {
+            } else if self.scalar.abs() >= position as i16 {
                 zeros = 1 + ((self.scalar.abs() as i32 - position as i32) / 100);
             }
         } else {
