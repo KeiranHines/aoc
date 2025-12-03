@@ -12,3 +12,10 @@ opt-level = 3
 [dependencies]
 fancy-regex = "0.16.2"
 tokio = { version = "1.48.0", features = ["macros", "rt", "rt-multi-thread"] }
+
+[dev-dependencies]
+criterion = { version = "0.8.0", features = ["html_reports"] }
+
+[[bench]]
+name="benches"
+harness=false
