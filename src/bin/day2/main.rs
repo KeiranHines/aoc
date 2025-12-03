@@ -35,11 +35,27 @@ fn parse(contents: &str) -> Vec<Range> {
 fn part1(ranges: Vec<Range>) -> u64 {
     let mut total = 0u64;
     for r in ranges {
-        for i in r.min_num..=r.max_num {
-            let st = i.to_string();
-            let mid = st.len() / 2;
-            if st[..mid] == st[mid..] {
-                total += i;
+        if r.min_str.len() % 2 == 1 && r.min_str.len() == r.max_str.len() {
+            continue;
+        }
+        let mut mid_str: &str = &r.min_str;
+        if mid_str.len() > 1 {
+            mid_str = &mid_str[0..mid_str.len() / 2];
+        }
+        let mid_min: u32 = mid_str.parse().unwrap();
+        let mut mid_str_max = &r.max_str[0..r.max_str.len() / 2];
+        if r.max_str.len() % 2 == 1 {
+            mid_str_max = &r.max_str[0..=r.max_str.len() / 2];
+        }
+        let mid_max = mid_str_max.parse().unwrap();
+        for i in mid_min..=mid_max {
+            let t: u64 = format!("{i}{i}").parse().unwrap();
+            if t >= r.min_num {
+                if t <= r.max_num {
+                    total += t as u64;
+                } else {
+                    break;
+                }
             }
         }
     }
@@ -63,7 +79,7 @@ fn part2(ranges: Vec<Range>) -> u64 {
                     duplicates = false;
                 }
             }
-            if duplicates && re.is_match(&i.to_string()).expect("no match") {
+            if duplicates && re.is_match(&st).expect("no match") {
                 total += i;
             }
         }
@@ -132,4 +148,12 @@ fn test_twos() {
     let r = Range::from_string("222220-222224");
     let res = part1(vec![r]);
     assert_eq!(res, 222222);
+}
+
+#[test]
+fn test_actual() {
+    let contents = fs::read_to_string("inputs/day2.txt").unwrap();
+    let ranges = parse(&contents);
+    let p1 = part1(ranges.clone());
+    assert_eq!(p1, 26255179562);
 }
