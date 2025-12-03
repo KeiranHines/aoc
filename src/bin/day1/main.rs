@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, time::Instant};
 
 #[derive(Debug, Clone)]
 struct Rotation {
@@ -61,9 +61,14 @@ fn part2(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day1.txt")?;
     let rotations = parse(&contents);
+    let mut start = Instant::now();
     let p1 = part1(50, rotations.clone());
+    let p1t = start.elapsed();
+    start = Instant::now();
     let p2 = part2(50, rotations);
+    let p2t = start.elapsed();
     println!("Part 1: {p1}, Part 2: {p2}");
+    println!("Part 1: {p1t:?}, Part 2: {p2t:?}");
     Ok(())
 }
 
