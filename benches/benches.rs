@@ -2,7 +2,7 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use std::fs;
 use std::hint::black_box;
 
-#[path = "../src/day3.rs"]
+#[path = "../src/bin/day3/main.rs"]
 mod day3;
 use day3::{parse, part2};
 
