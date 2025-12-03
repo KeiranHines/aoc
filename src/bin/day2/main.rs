@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, time::Instant};
 
 use fancy_regex::Regex;
 
@@ -74,9 +74,14 @@ fn part2(ranges: Vec<Range>) -> u64 {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day2.txt")?;
     let ranges = parse(&contents);
+    let mut start = Instant::now();
     let p1 = part1(ranges.clone());
+    let p1t = start.elapsed();
+    start = Instant::now();
     let p2 = part2(ranges);
+    let p2t = start.elapsed();
     println!("Part 1: {p1}, Part 2: {p2}");
+    println!("Part 1: {p1t:?}, Part 2: {p2t:?}");
     Ok(())
 }
 
