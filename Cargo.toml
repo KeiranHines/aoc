@@ -14,7 +14,7 @@ fancy-regex = "0.16.2"
 tokio = { version = "1.48.0", features = ["macros", "rt", "rt-multi-thread"] }
 
 [dev-dependencies]
-criterion = { version = "0.8.0", features = ["html_reports"] }
+criterion = { version = "0.8.0", features = ["html_reports", "async", "async_tokio"] }
 
 [[bench]]
 name="benches"

@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs, time::Instant};
 
 use fancy_regex::Regex;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Range {
     #[allow(dead_code)]
     min_str: String,
