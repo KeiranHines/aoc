@@ -9,6 +9,8 @@ mod day1;
 mod day2;
 #[path = "../src/bin/day3.rs"]
 mod day3;
+#[path = "../src/bin/day4.rs"]
+mod day4;
 
 fn day1(c: &mut Criterion) {
     let contents = fs::read_to_string("inputs/day1.txt").unwrap();
@@ -48,5 +50,12 @@ fn day3(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, day1, day2, day3);
+fn day4(c: &mut Criterion) {
+    let contents = fs::read_to_string("inputs/day4.txt").unwrap();
+    let mut g = c.benchmark_group("day4");
+    g.bench_function("part1", |b| b.iter(|| day4::part1(black_box(&contents))));
+    g.bench_function("part2", |b| b.iter(|| day4::part2(black_box(&contents))));
+}
+
+criterion_group!(benches, day1, day2, day3, day4);
 criterion_main!(benches);
