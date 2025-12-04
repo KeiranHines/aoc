@@ -63,43 +63,42 @@ pub fn part2(input: &str) -> u64 {
     while can_remove {
         can_remove = false;
         for y in 0..grid.len() {
-            let row = grid.get(y).unwrap().clone();
-            for (x, point) in row.iter().enumerate() {
+            for x in 0..grid[y].len() {
                 let mut count = 0;
-                if *point == TP {
+                if grid[y][x] == TP {
                     if y > 0 {
-                        let top_row = grid.get(y - 1).unwrap();
-                        if *top_row.get(x).unwrap() == TP {
+                        let top_row = &grid[y - 1];
+                        if top_row[x] == TP {
                             count += 1;
                         }
-                        if x > 0 && *top_row.get(x - 1).unwrap() == TP {
+                        if x > 0 && top_row[x - 1] == TP {
                             // Top Left
                             count += 1;
                         }
-                        if x < row.len() - 1 && *top_row.get(x + 1).unwrap() == TP {
+                        if x < grid[y].len() - 1 && top_row[x + 1] == TP {
                             // Top right
                             count += 1;
                         }
                     }
                     if y < grid.len() - 1 {
-                        let bottom_row = grid.get(y + 1).unwrap();
-                        if *bottom_row.get(x).unwrap() == TP {
+                        let bottom_row = &grid[y + 1];
+                        if bottom_row[x] == TP {
                             count += 1;
                         }
-                        if x > 0 && *bottom_row.get(x - 1).unwrap() == TP {
+                        if x > 0 && bottom_row[x - 1] == TP {
                             // Botom Left
                             count += 1;
                         }
-                        if x < row.len() - 1 && *bottom_row.get(x + 1).unwrap() == TP {
+                        if x < grid[y].len() - 1 && bottom_row[x + 1] == TP {
                             // Bottom right
                             count += 1;
                         }
                     }
-                    if x > 0 && *row.get(x - 1).unwrap() == TP {
+                    if x > 0 && grid[y][x - 1] == TP {
                         // left
                         count += 1;
                     }
-                    if x < row.len() - 1 && *row.get(x + 1).unwrap() == TP {
+                    if x < grid[y].len() - 1 && grid[y][x + 1] == TP {
                         // Right
                         count += 1;
                     }
