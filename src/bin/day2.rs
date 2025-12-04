@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs, time::Instant};
 use fancy_regex::Regex;
 
 #[derive(Clone)]
-struct Range {
+pub struct Range {
     #[allow(dead_code)]
     min_str: String,
     #[allow(dead_code)] // used in better p2 impl
@@ -24,7 +24,7 @@ impl Range {
     }
 }
 
-fn parse(contents: &str) -> Vec<Range> {
+pub fn parse(contents: &str) -> Vec<Range> {
     contents
         .trim()
         .split(",")
@@ -32,7 +32,7 @@ fn parse(contents: &str) -> Vec<Range> {
         .collect()
 }
 
-fn part1(ranges: Vec<Range>) -> u64 {
+pub fn part1(ranges: Vec<Range>) -> u64 {
     let mut total = 0u64;
     for r in ranges {
         if r.min_str.len() % 2 == 1 && r.min_str.len() == r.max_str.len() {
@@ -62,7 +62,7 @@ fn part1(ranges: Vec<Range>) -> u64 {
     total
 }
 
-async fn part2(ranges: Vec<Range>) -> u64 {
+pub async fn part2(ranges: Vec<Range>) -> u64 {
     let mut final_total = 0u64;
     let mut handles = Vec::new();
     for r in ranges {

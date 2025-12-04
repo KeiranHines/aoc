@@ -1,7 +1,7 @@
 use std::{fs, time::Instant};
 
 #[derive(Debug, Clone)]
-struct Rotation {
+pub struct Rotation {
     scalar: i16,
 }
 
@@ -32,12 +32,12 @@ impl Rotation {
     }
 }
 
-fn parse(contents: &str) -> Vec<Rotation> {
+pub fn parse(contents: &str) -> Vec<Rotation> {
     let rotations = contents.lines().map(|l| Rotation::from_string(l)).collect();
     rotations
 }
 
-fn part1(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
+pub fn part1(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
     let mut zero_count = 0u32;
     for r in rotations {
         (initial, _) = r.effect(initial);
@@ -48,7 +48,7 @@ fn part1(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
     zero_count
 }
 
-fn part2(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
+pub fn part2(mut initial: u8, rotations: Vec<Rotation>) -> u32 {
     let mut zero_count = 0u32;
     for r in rotations {
         let (i, zeros) = r.effect(initial);
