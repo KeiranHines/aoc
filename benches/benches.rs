@@ -12,14 +12,13 @@ mod day3;
 
 fn day1(c: &mut Criterion) {
     let contents = fs::read_to_string("inputs/day1.txt").unwrap();
-    let ranges = day1::parse(&contents);
 
     let mut g = c.benchmark_group("day1");
     g.bench_function("part1", |b| {
-        b.iter(|| day1::part1(50, black_box(ranges.clone())))
+        b.iter(|| day1::part1(50, black_box(&contents)))
     });
     g.bench_function("part2", |b| {
-        b.iter(|| day1::part2(50, black_box(ranges.clone())))
+        b.iter(|| day1::part2(50, black_box(&contents)))
     });
 }
 fn day2(c: &mut Criterion) {
