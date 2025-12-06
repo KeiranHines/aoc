@@ -1,7 +1,7 @@
 use core::fmt;
 use std::{collections::HashSet, fs, time::Instant};
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct Range {
     min: u64,
     max: u64,
@@ -38,7 +38,7 @@ pub fn part1(input: &str) -> u64 {
 
 fn simplify(r1: &Range, r2: &Range) -> Vec<Range> {
     if r1.min >= r2.min {
-        if r1.min > r2.max {
+        if r1.min > r2.max + 1 {
             // R1 is fully after r2
             return vec![r1.clone(), r2.clone()];
         }
@@ -71,6 +71,25 @@ fn simplify(r1: &Range, r2: &Range) -> Vec<Range> {
     }
 }
 
+fn process_ranges(ranges: &Vec<Range>) -> Vec<Range> {
+    let mut replace = HashSet::new();
+    for i in 0..ranges.len() {
+        let mut best = ranges[i].clone();
+        for j in 0..ranges.len() {
+            if i != j {
+                let x = simplify(&best, &ranges[j]);
+                if x.len() == 1 {
+                    best = x[0].clone();
+                }
+            }
+        }
+        replace.insert(best);
+    }
+    let mut x = replace.into_iter().collect::<Vec<Range>>();
+    x.sort();
+    x
+}
+
 pub fn part2(input: &str) -> u64 {
     let mid = input.find("\n\n").unwrap();
     let mut ranges: Vec<Range> = input[0..mid]
@@ -84,23 +103,8 @@ pub fn part2(input: &str) -> u64 {
         })
         .collect();
     loop {
-        let mut replace = HashSet::new();
-        for i in 0..ranges.len() {
-            let mut best = ranges[i].clone();
-            for j in i + 0..ranges.len() {
-                if i != j {
-                    let x = simplify(&best, &ranges[j]);
-                    if x.len() == 1 {
-                        best = x[0].clone();
-                    }
-                }
-                //    println!("Simplified {:?} {:?} to {:?}", ranges[i], ranges[j], x);
-            }
-            replace.insert(best);
-        }
-        let replace_vec = replace.into_iter().collect();
+        let replace_vec = process_ranges(&ranges);
         if replace_vec == ranges {
-            println!("break");
             break;
         }
         ranges = replace_vec;
@@ -178,4 +182,83 @@ fn test_complete_overlap_one_off() {
 1";
     let p2 = part2(input);
     assert_eq!(p2, 20);
+}
+
+#[test]
+fn test_broken() {
+    let r1 = Range { min: 7, max: 9 };
+    let r2 = Range { min: 10, max: 20 };
+    let r3 = Range { min: 1, max: 6 };
+
+    let b1 = Range {
+        min: r1.min,
+        max: r2.max,
+    };
+    let x = simplify(&r1, &r2);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b1);
+    let x = simplify(&r2, &r1);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b1);
+
+    let b2 = Range {
+        min: r3.min,
+        max: r1.max,
+    };
+    let x = simplify(&r1, &r3);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b2);
+    let x = simplify(&r3, &r1);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b2);
+
+    let x = simplify(&r2, &r3);
+    assert_eq!(x.len(), 2);
+    assert_eq!(x[0], r2);
+    assert_eq!(x[1], r3);
+
+    let x = simplify(&r3, &r2);
+    assert_eq!(x.len(), 2);
+    assert_eq!(x[0], r3);
+    assert_eq!(x[1], r2);
+    let b3 = Range {
+        min: r3.min,
+        max: r2.max,
+    };
+
+    let x = simplify(&b3, &r2);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b3);
+
+    let x = simplify(&r2, &b3);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b3);
+
+    let v = vec![r1, r2.clone(), r3.clone()];
+    let v1 = process_ranges(&v);
+    let res1 = vec![r3.clone(), b3.clone(), r2.clone()];
+    assert_eq!(v1, res1);
+
+    let v = vec![b3.clone(), r2.clone()];
+    let v1 = process_ranges(&v);
+    let res1 = vec![b3.clone()];
+    assert_eq!(v1, res1);
+}
+#[test]
+fn test_broken2() {
+    let b3 = Range { min: 1, max: 20 };
+    let r2 = Range { min: 10, max: 20 };
+
+    let x = simplify(&b3, &r2);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b3);
+
+    let x = simplify(&r2, &b3);
+    assert_eq!(x.len(), 1);
+    assert_eq!(x[0], b3);
+
+    let v = vec![b3.clone(), r2.clone()];
+    let v1 = process_ranges(&v);
+    let res1 = vec![b3.clone()];
+    assert_eq!(v1, res1);
 }
