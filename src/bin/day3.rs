@@ -2,7 +2,6 @@ use std::{fs, time::Instant};
 
 const RADIX: u32 = 10;
 
-#[inline]
 pub fn parse(contents: &str) -> Vec<Vec<u32>> {
     contents
         .trim()
@@ -11,7 +10,6 @@ pub fn parse(contents: &str) -> Vec<Vec<u32>> {
         .collect()
 }
 
-#[inline]
 fn find_largest_set(banks: Vec<Vec<u32>>, count: usize) -> u64 {
     let mut total = 0;
     banks.iter().for_each(|b| {
@@ -35,17 +33,16 @@ fn find_largest_set(banks: Vec<Vec<u32>>, count: usize) -> u64 {
     total
 }
 
-#[inline]
 pub fn part1(banks: Vec<Vec<u32>>) -> u64 {
     find_largest_set(banks, 2)
 }
 
-#[inline]
 pub fn part2(banks: Vec<Vec<u32>>) -> u64 {
     find_largest_set(banks, 12)
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[allow(dead_code)]
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day3.txt")?;
     let ranges = parse(&contents);
     let mut start = Instant::now();

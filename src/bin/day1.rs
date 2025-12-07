@@ -51,7 +51,7 @@ pub fn part2(mut initial: i32, input: &str) -> u32 {
 }
 
 #[allow(dead_code)]
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day1.txt")?;
     let mut start = Instant::now();
     let p1 = part1(50, &contents);

@@ -97,7 +97,12 @@ pub async fn part2(ranges: Vec<Range>) -> u64 {
 }
 
 #[tokio::main]
+#[allow(dead_code)]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    async_runner().await
+}
+
+pub async fn async_runner() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day2.txt")?;
     let ranges = parse(&contents);
     let mut start = Instant::now();

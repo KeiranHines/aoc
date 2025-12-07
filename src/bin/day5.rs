@@ -113,7 +113,7 @@ pub fn part2(input: &str) -> u64 {
 }
 
 #[allow(dead_code)]
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let contents = fs::read_to_string("inputs/day5.txt")?;
     let mut start = Instant::now();
     let p1 = part1(&contents);
