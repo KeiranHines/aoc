@@ -1,6 +1,7 @@
 use std::{fs, time::Instant};
 
 const TP: char = '@';
+const EMPTY: char = '.';
 
 pub fn part1(input: &str) -> u64 {
     let mut free = 0;
@@ -58,60 +59,72 @@ pub fn part1(input: &str) -> u64 {
 
 pub fn part2(input: &str) -> u64 {
     let mut free = 0;
-    let mut can_remove = true;
     let mut grid: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
-    while can_remove {
-        can_remove = false;
-        for y in 0..grid.len() {
-            for x in 0..grid[y].len() {
-                let mut count = 0;
-                if grid[y][x] == TP {
-                    if y > 0 {
-                        let top_row = &grid[y - 1];
-                        if top_row[x] == TP {
-                            count += 1;
-                        }
-                        if x > 0 && top_row[x - 1] == TP {
-                            // Top Left
-                            count += 1;
-                        }
-                        if x < grid[y].len() - 1 && top_row[x + 1] == TP {
-                            // Top right
-                            count += 1;
-                        }
-                    }
-                    if y < grid.len() - 1 {
-                        let bottom_row = &grid[y + 1];
-                        if bottom_row[x] == TP {
-                            count += 1;
-                        }
-                        if x > 0 && bottom_row[x - 1] == TP {
-                            // Botom Left
-                            count += 1;
-                        }
-                        if x < grid[y].len() - 1 && bottom_row[x + 1] == TP {
-                            // Bottom right
-                            count += 1;
-                        }
-                    }
-                    if x > 0 && grid[y][x - 1] == TP {
-                        // left
-                        count += 1;
-                    }
-                    if x < grid[y].len() - 1 && grid[y][x + 1] == TP {
-                        // Right
-                        count += 1;
-                    }
-                    if count < 4 {
-                        free += 1;
-                        grid[y][x] = '.';
-                        can_remove = true;
-                    }
-                }
+    let mut tp: Vec<(usize, usize)> = Vec::new();
+
+    for y in 0..grid.len() {
+        for x in 0..grid[y].len() {
+            if grid[y][x] == TP {
+                tp.push((y, x));
             }
         }
     }
 
+    let mut count;
+    loop {
+        let mut temp = Vec::new();
+        for &(y, x) in &tp {
+            count = 0;
+            let right_edge = x < grid[y].len() - 1;
+            if y > 0 {
+                let top_row = &grid[y - 1];
+                if top_row[x] == TP {
+                    count += 1;
+                }
+                if x > 0 && top_row[x - 1] == TP {
+                    // Top Left
+                    count += 1;
+                }
+                if right_edge && top_row[x + 1] == TP {
+                    // Top right
+                    count += 1;
+                }
+            }
+            if y < grid.len() - 1 {
+                let bottom_row = &grid[y + 1];
+                if bottom_row[x] == TP {
+                    count += 1;
+                }
+                if x > 0 && bottom_row[x - 1] == TP {
+                    // Botom Left
+                    count += 1;
+                }
+                if right_edge && bottom_row[x + 1] == TP {
+                    // Bottom right
+                    count += 1;
+                }
+            }
+            let row = &grid[y];
+            if x > 0 && row[x - 1] == TP {
+                // left
+                count += 1;
+            }
+            if right_edge && row[x + 1] == TP {
+                // Right
+                count += 1;
+            }
+            if count < 4 {
+                free += 1;
+                grid[y][x] = EMPTY;
+            } else {
+                temp.push((y, x));
+            }
+        }
+        if tp.len() == temp.len() {
+            break;
+        }
+        tp = temp;
+    }
     free
 }
 
