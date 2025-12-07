@@ -1,5 +1,8 @@
 use std::{fs, time::Instant};
 
+const MULT: &str = "*";
+const SPACE: char = ' ';
+
 pub fn part1(input: &str) -> u64 {
     let lines: Vec<Vec<&str>> = input
         .lines()
@@ -11,7 +14,7 @@ pub fn part1(input: &str) -> u64 {
     let mut total = 0;
     let numbers = nums.len();
     for i in 0..lines[0].len() {
-        if cmds[i] == "*" {
+        if cmds[i] == MULT {
             let mut sum = 1;
             for n in 0..numbers {
                 sum *= lines[n][i].parse::<u64>().unwrap();
@@ -40,32 +43,31 @@ pub fn part2(input: &str) -> u64 {
 
     let mut has_number = false;
     let mut sum = 0;
-    let mut cmd = "";
+    let mut cmd = MULT;
+    let mut num_strings: String = String::new();
     for i in (0..lines[0].len()).rev() {
         if !has_number {
             // Start a new sum
             total += sum;
             cmd = cmds.pop().unwrap();
-            if cmd == "*" {
+            if cmd == MULT {
                 sum = 1;
             } else {
                 sum = 0;
             }
         }
         has_number = false;
-        let mut num_strings: String = "".to_string();
-
+        num_strings.clear();
         for n in 0..numbers {
-            if nums[n][i] != ' ' {
+            if nums[n][i] != SPACE {
                 num_strings.push(nums[n][i]);
                 has_number = true;
             }
         }
         if has_number {
-            if cmd == "*" {
+            if cmd == MULT {
                 sum *= num_strings.parse::<u64>().unwrap()
-            }
-            if cmd == "+" {
+            } else {
                 sum += num_strings.parse::<u64>().unwrap()
             }
         }
