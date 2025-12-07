@@ -79,7 +79,7 @@ fn day6(c: &mut Criterion) {
 
 fn day7(c: &mut Criterion) {
     let contents = fs::read_to_string("inputs/day7.txt").unwrap();
-    let mut g = c.benchmark_group("day6");
+    let mut g = c.benchmark_group("day7");
     g.bench_function("part1", |b| b.iter(|| day7::part1(black_box(&contents))));
     g.bench_function("part2", |b| b.iter(|| day7::part2(black_box(&contents))));
 }
