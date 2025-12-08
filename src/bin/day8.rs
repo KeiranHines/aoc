@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{cmp, collections::HashSet, fs, time::Instant};
+use std::{cmp, fs, time::Instant};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Pos {
@@ -42,7 +42,7 @@ fn distance_to(pos1: Pos, pos2: Pos) -> i32 {
 }
 
 pub fn part1(input: &str) -> u64 {
-    part1_processing(input, 10_000)
+    part1_processing(input, 1000)
 }
 
 fn part1_processing(input: &str, limit: u32) -> u64 {
@@ -61,10 +61,7 @@ fn part1_processing(input: &str, limit: u32) -> u64 {
     }
 
     for (i, b1) in boxes.iter().enumerate() {
-        for (j, b2) in boxes[i + 1..].iter().enumerate() {
-            if i == j {
-                continue;
-            }
+        for b2 in boxes[i + 1..].iter() {
             dist = distance_to(*b1, *b2);
             let new_con = Connection {
                 pos1: *b1,
@@ -74,9 +71,12 @@ fn part1_processing(input: &str, limit: u32) -> u64 {
             connections.push(new_con);
         }
     }
-    connections.sort_by(|a, b| a.distance.cmp(&b.distance));
+    // All possible connections found
 
+    connections.sort_unstable_by_key(|a| a.distance);
     connections.reverse();
+
+    // All possible connections are now sorted
 
     let mut circuits: Vec<Vec<Pos>> = Vec::new();
     let mut c: Connection;
@@ -101,36 +101,25 @@ fn part1_processing(input: &str, limit: u32) -> u64 {
         } else if c1 == None {
             // Only c2 is set
             circuits[c2.unwrap()].push(c.pos1);
-        } else {
-            if c1.unwrap() != c2.unwrap() {
-                let remove = cmp::max(c1.unwrap(), c2.unwrap());
-                let keep = cmp::min(c1.unwrap(), c2.unwrap());
-                let other = circuits.remove(remove);
-                circuits[keep].extend(other);
-            } else {
-                println!("Nothing happens");
-            }
+        } else if c1.unwrap() != c2.unwrap() {
+            let remove = cmp::max(c1.unwrap(), c2.unwrap());
+            let keep = cmp::min(c1.unwrap(), c2.unwrap());
+            let other = circuits.remove(remove);
+            circuits[keep].extend(other);
         }
-        //println!("It: {_i} {circuits:?}");
+        println!("It: {_i} {}", circuits.len());
     }
-    let mut total = 1;
 
     circuits.sort_by(|a, b| b.len().cmp(&a.len()));
-    let mut temp: HashSet<Pos> = HashSet::new();
-    for c in &circuits {
-        temp.extend(c);
-        println!("{}", c.len());
-    }
-
-    circuits[0..3].iter().for_each(|c| {
-        println!("c len {}", c.len());
-        total *= c.len()
-    });
-
-    total as u64
+    println!(
+        "Circuits {:?}",
+        circuits.iter().map(|c| c.len()).collect::<Vec<usize>>()
+    );
+    (circuits[0].len() * circuits[1].len() * circuits[2].len()) as u64
 }
 
-pub fn part2(input: &str) -> u64 {
+#[allow(dead_code)]
+pub fn part2(_input: &str) -> u64 {
     0
 }
 
@@ -189,7 +178,6 @@ fn test_example1() {
 ";
     let p1 = part1_processing(input, 10);
     assert_eq!(p1, 40);
-    assert!(false)
 }
 
 /*#[test]
