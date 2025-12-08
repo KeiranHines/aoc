@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{fs, time::Instant};
+use std::{cmp, collections::HashSet, fs, time::Instant};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Pos {
@@ -17,7 +17,7 @@ impl fmt::Debug for Pos {
 struct Connection {
     pos1: Pos,
     pos2: Pos,
-    distance: f32,
+    distance: i32,
 }
 
 impl fmt::Debug for Connection {
@@ -35,8 +35,9 @@ impl PartialEq for Connection {
 }
 impl Eq for Connection {}
 
-fn distance_to(pos1: Pos, pos2: Pos) -> f32 {
-    (((pos1.x - pos2.x).pow(2) + (pos1.y - pos2.y).pow(2) + (pos1.z - pos2.z).pow(2)) as f32).sqrt()
+fn distance_to(pos1: Pos, pos2: Pos) -> i32 {
+    // No euclidian distance, sqrt == float == bad
+    (pos1.x - pos2.x).pow(2) + (pos1.y - pos2.y).pow(2) + (pos1.z - pos2.z).pow(2)
     //((pos1.x - pos2.x).abs() + (pos1.y - pos2.y).abs() + (pos1.z - pos2.z).abs()) as u64
 }
 
@@ -73,79 +74,55 @@ fn part1_processing(input: &str, limit: u32) -> u64 {
             connections.push(new_con);
         }
     }
-    connections.sort_by(|a, b| {
-        a.distance.partial_cmp(&b.distance).unwrap_or_else(|| {
-            // Define custom ordering for NaNs
-            if a.distance.is_nan() && b.distance.is_nan() {
-                std::cmp::Ordering::Equal
-            } else if a.distance.is_nan() {
-                std::cmp::Ordering::Greater
-            } else {
-                std::cmp::Ordering::Less
-            }
-        })
-    });
+    connections.sort_by(|a, b| a.distance.cmp(&b.distance));
 
     connections.reverse();
 
-    let mut seen: Vec<Pos> = Vec::with_capacity(limit as usize);
     let mut circuits: Vec<Vec<Pos>> = Vec::new();
     let mut c: Connection;
     for _i in 0..limit {
         //let _ = connections.pop(); // I wrote bad code so I really only need every second
         c = connections.pop().unwrap();
-        println!("{_i}");
-        let seen1 = seen.contains(&c.pos1);
-        let seen2 = seen.contains(&c.pos2);
-
-        if !seen1 && !seen2 {
-            // TODO: Probably need to check if they are on the same circuit first
-
-            // Neither seen, create new circuit
-            seen.push(c.pos1);
-            seen.push(c.pos2);
-            circuits.push(vec![c.pos1, c.pos2]);
-        } else if !seen1 {
-            // p1 exists only add p2.
-            seen.push(c.pos1);
-            for circ in &mut circuits {
-                if circ.contains(&c.pos2) {
-                    circ.push(c.pos1);
-                }
+        let mut c1 = None;
+        let mut c2 = None;
+        for (i, circ) in &mut circuits.iter().enumerate() {
+            if circ.contains(&c.pos1) {
+                c1 = Some(i);
             }
-        } else if !seen2 {
-            // p1 exists only add p2.
-            seen.push(c.pos2);
-            for circ in &mut circuits {
-                if circ.contains(&c.pos1) {
-                    circ.push(c.pos2);
-                }
-            }
-        } else {
-            let mut c1 = None;
-            let mut c2 = None;
-            for circ in &mut circuits {
-                if circ.contains(&c.pos1) {
-                    c1 = Some(circ);
-                } else if circ.contains(&c.pos2) {
-                    c2 = Some(circ);
-                }
-            }
-            if c1 != None && c2 != None {
-                // If one is None they are already in the same collection
-                let f = c1.unwrap();
-                for c in c2.unwrap() {
-                    f.push(*c);
-                }
+            if circ.contains(&c.pos2) {
+                c2 = Some(i);
             }
         }
-        //println!("Iteration {i} {} {circuits:?}", seen.len());
+        if c1 == None && c2 == None {
+            circuits.push(vec![c.pos1, c.pos2]);
+        } else if c2 == None {
+            // Only c1 is set
+            circuits[c1.unwrap()].push(c.pos2);
+        } else if c1 == None {
+            // Only c2 is set
+            circuits[c2.unwrap()].push(c.pos1);
+        } else {
+            if c1.unwrap() != c2.unwrap() {
+                let remove = cmp::max(c1.unwrap(), c2.unwrap());
+                let keep = cmp::min(c1.unwrap(), c2.unwrap());
+                let other = circuits.remove(remove);
+                circuits[keep].extend(other);
+            } else {
+                println!("Nothing happens");
+            }
+        }
+        //println!("It: {_i} {circuits:?}");
     }
     let mut total = 1;
 
-    circuits.sort_by(|a, b| a.len().cmp(&b.len()));
+    circuits.sort_by(|a, b| b.len().cmp(&a.len()));
+    let mut temp: HashSet<Pos> = HashSet::new();
+    for c in &circuits {
+        temp.extend(c);
+        println!("{}", c.len());
+    }
 
-    circuits[circuits.len() - 3..].iter().for_each(|c| {
+    circuits[0..3].iter().for_each(|c| {
         println!("c len {}", c.len());
         total *= c.len()
     });
@@ -184,7 +161,7 @@ fn test_closest() {
         z: 689,
     };
 
-    assert_eq!(distance_to(p1, p2), 316.9022);
+    assert_eq!(distance_to(p1, p2), 100427);
 }
 
 #[test]
@@ -212,6 +189,7 @@ fn test_example1() {
 ";
     let p1 = part1_processing(input, 10);
     assert_eq!(p1, 40);
+    assert!(false)
 }
 
 /*#[test]
