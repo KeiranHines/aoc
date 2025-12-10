@@ -204,12 +204,17 @@ fn test_example2() {
 
 #[test]
 fn test_case_that_was_missed() {
-
+    // Start from 1, if 2 < next we've turned within the border
+    // Find corner where we rejoin (?), might be able to skip this by extending out from 3
+    // do the same from both 1 in both directions and 3?
+    // would need to check the turn is going towards the oposite corner, otherwise it could still
+    // be valid, maybe I can treat it as valid and check the opposite point on the same line and
+    // that's enough
     //..............
     //.......#XXX#..
     //.......XXXXX..
-    //..3OOOOOO4XX..
-    //..2OOOOOOOX#OOOOOOOOO3..
+    //..#XXXXXXXX#..
+    //..2OOOOOOOX?OOOOOOOOO3..
     //..1OOOOOO#X#OOOOOOOOO4..
     //.........XXX..
     //.........#X#..
