@@ -1,6 +1,7 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     fs,
+    io::stdout,
     time::Instant,
 };
 
@@ -73,21 +74,105 @@ pub fn part1(input: &str) -> u64 {
     find_all_paths_dfs(&all, &"you", &"out").len() as u64
 }
 
+struct Entry2 {
+    connected: Vec<u16>,
+}
+
+fn find_all_paths_dfs2(
+    graph: &HashMap<u16, Entry2>,
+    start_node: u16,
+    end_node: u16,
+    skip_node: Option<u16>,
+) -> Vec<Vec<u16>> {
+    let mut all_paths = Vec::new();
+    let mut current_path = Vec::new();
+    let mut visited = HashSet::new();
+    let _ = match skip_node {
+        Some(n) => visited.insert(n),
+        _ => false,
+    };
+    dfs_backtrack2(
+        graph,
+        start_node,
+        end_node,
+        &mut current_path,
+        &mut visited,
+        &mut all_paths,
+    );
+
+    all_paths
+}
+
+fn dfs_backtrack2(
+    graph: &HashMap<u16, Entry2>,
+    current_node: u16,
+    end_node: u16,
+    current_path: &mut Vec<u16>,
+    visited: &mut HashSet<u16>,
+    all_paths: &mut Vec<Vec<u16>>,
+) {
+    // Mark the current node as visited and add to the current path
+    visited.insert(current_node);
+    current_path.push(current_node);
+
+    if current_node == end_node {
+        // Found a path, add a clone to the results
+        all_paths.push(current_path.clone());
+    } else {
+        // Explore neighbors
+        for &neighbor in &graph.get(&current_node).unwrap().connected {
+            if !visited.contains(&neighbor) {
+                dfs_backtrack2(graph, neighbor, end_node, current_path, visited, all_paths);
+            }
+        }
+    }
+
+    // Backtrack: unmark the node and remove from the current path
+    current_path.pop();
+    visited.remove(&current_node);
+}
+
 pub fn part2(input: &str) -> u64 {
-    let mut all: HashMap<&str, Entry> = HashMap::new();
+    let mut all: HashMap<u16, Entry2> = HashMap::new();
     let mut mapping: HashMap<&str, u16> = HashMap::new();
+    let mut next = 0;
+    input.lines().for_each(|l| {
+        let parts: Vec<&str> = l.split(": ").collect();
+        mapping.insert(parts[0], next);
+        next += 1;
+    });
+    mapping.insert(&"out", next);
     input.lines().for_each(|l| {
         let parts: Vec<&str> = l.split(": ").collect();
         all.insert(
-            parts[0],
-            Entry {
-                connected: parts[1].split(" ").collect(),
+            *mapping.get(parts[0]).unwrap(),
+            Entry2 {
+                connected: parts[1]
+                    .split(" ")
+                    .map(|s| *mapping.get(s).unwrap())
+                    .collect(),
             },
         );
     });
-    let mut x = find_all_paths_dfs(&all, &"svr", &"out");
-    x.retain(|p| p.contains(&"dac") && p.contains(&"fft"));
-    x.len() as u64
+    all.insert(next, Entry2 { connected: vec![] });
+    /*let dac = *mapping.get(&"dac").unwrap();
+    let fft = *mapping.get(&"fft").unwrap();
+    let svr = *mapping.get(&"svr").unwrap();
+    let out = *mapping.get(&"out").unwrap();
+
+    let svr_dac = find_all_paths_dfs2(&all, svr, dac, Some(fft)).len();
+        println!("svr_dac");
+        let dac_fft = find_all_paths_dfs2(&all, dac, fft, None).len();
+        println!("dac_fft");
+        let fft_out = find_all_paths_dfs2(&all, fft, dac, Some(dac)).len();
+        println!("Half way");
+        let svr_fft = find_all_paths_dfs2(&all, svr, fft, Some(dac)).len();
+        let fft_dac = find_all_paths_dfs2(&all, fft, dac, None).len();
+        let dac_out = find_all_paths_dfs2(&all, dac, out, Some(fft)).len();
+
+        (svr_dac * dac_fft * fft_out) as u64 + (svr_fft * fft_dac * dac_out) as u64
+    */
+    0
 }
 
 #[allow(dead_code)]
