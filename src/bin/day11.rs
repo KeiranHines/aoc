@@ -1,7 +1,6 @@
 use std::{
-    collections::{HashMap, HashSet, VecDeque},
+    collections::{HashMap, HashSet},
     fs,
-    io::stdout,
     time::Instant,
 };
 
@@ -131,6 +130,26 @@ fn dfs_backtrack2(
     current_path.pop();
     visited.remove(&current_node);
 }
+fn count_paths(
+    graph: &HashMap<u16, Entry2>,
+    current_node: u16,
+    end_node: u16,
+    count: &mut HashMap<u16, u64>,
+) -> u64 {
+    if current_node == end_node {
+        // Last step from current to end, call it a day.
+        return 1;
+    }
+    if let Some(cached) = count.get(&current_node) {
+        return *cached;
+    }
+    let mut total = 0;
+    for ele in &graph.get(&current_node).unwrap().connected {
+        total += count_paths(graph, *ele, end_node, count);
+    }
+    count.insert(current_node, total);
+    total
+}
 
 pub fn part2(input: &str) -> u64 {
     let mut all: HashMap<u16, Entry2> = HashMap::new();
@@ -155,24 +174,25 @@ pub fn part2(input: &str) -> u64 {
         );
     });
     all.insert(next, Entry2 { connected: vec![] });
-    /*let dac = *mapping.get(&"dac").unwrap();
+    let dac = *mapping.get(&"dac").unwrap();
     let fft = *mapping.get(&"fft").unwrap();
     let svr = *mapping.get(&"svr").unwrap();
     let out = *mapping.get(&"out").unwrap();
 
-    let svr_dac = find_all_paths_dfs2(&all, svr, dac, Some(fft)).len();
-        println!("svr_dac");
-        let dac_fft = find_all_paths_dfs2(&all, dac, fft, None).len();
-        println!("dac_fft");
-        let fft_out = find_all_paths_dfs2(&all, fft, dac, Some(dac)).len();
-        println!("Half way");
-        let svr_fft = find_all_paths_dfs2(&all, svr, fft, Some(dac)).len();
-        let fft_dac = find_all_paths_dfs2(&all, fft, dac, None).len();
-        let dac_out = find_all_paths_dfs2(&all, dac, out, Some(fft)).len();
+    /*let svr_dac = find_all_paths_dfs2(&all, svr, dac, Some(fft)).len();
+    println!("svr_dac");
+    let dac_fft = find_all_paths_dfs2(&all, dac, fft, None).len();
+    println!("dac_fft");
+    let fft_out = find_all_paths_dfs2(&all, fft, dac, Some(dac)).len();
+    println!("Half way");*/
+    let svr_fft = count_paths(&all, svr, fft, &mut HashMap::new());
+    let fft_dac = count_paths(&all, fft, dac, &mut HashMap::new());
+    let dac_out = count_paths(&all, dac, out, &mut HashMap::new());
 
-        (svr_dac * dac_fft * fft_out) as u64 + (svr_fft * fft_dac * dac_out) as u64
-    */
-    0
+    (svr_fft * fft_dac * dac_out) as u64
+    //(svr_dac * dac_fft * fft_out) as u64 + (svr_fft * fft_dac * dac_out) as u64
+
+    //0
 }
 
 #[allow(dead_code)]
