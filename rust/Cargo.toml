@@ -3,10 +3,11 @@ name = "aoc2015"
 version = "0.1.0"
 edition = "2024"
 
-[dependencies]
-
 [profile.release]
 strip = true # Automatically strip all symbols from the binary
 lto = true     # Enable Link-Time Optimization
 codegen-units = 1 # Disable parallel code generation for better cross-module optimization
 panic="abort" # abort support unwind from 1.92
+
+[dependencies]
+md-5 = "0.10.6"

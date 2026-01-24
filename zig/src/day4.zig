@@ -1,0 +1,79 @@
+const std = @import("std");
+const md5 = @import("std").crypto.hash.Md5;
+
+fn read_input(allocator: std.mem.Allocator, file_path: []const u8) ![]const u8 {
+    const file = try std.fs.cwd().openFile(file_path, .{});
+    defer file.close(); // Ensure the file is closed when the function exits.
+
+    // Get the file size to use as a maximum size for the buffer
+    const stat = try file.stat();
+    const file_contents = try file.readToEndAlloc(allocator, stat.size);
+
+    return file_contents;
+}
+
+fn part_1(instructions: []const u8) !u32 {
+    var i: u32 = 0;
+    const max_len = 20;
+    var buf: [max_len]u8 = undefined;
+    var md5_hash: [16]u8 = undefined;
+    const key = std.mem.trimEnd(u8, instructions, "\n");
+    while (true) {
+        const input_bytes: []const u8 = try std.fmt.bufPrint(&buf, "{s}{d}", .{ key, i });
+        _ = md5.hash(input_bytes, &md5_hash, .{});
+        if (md5_hash[0] == 0 and md5_hash[1] == 0 and md5_hash[2] < 0x10) {
+            return i;
+        }
+        i += 1;
+    }
+    return 0;
+}
+
+fn part_2(instructions: []const u8) !u32 {
+    var i: u32 = 0;
+    const max_len = 20;
+    var buf: [max_len]u8 = undefined;
+    var md5_hash: [16]u8 = undefined;
+    const key = std.mem.trimEnd(u8, instructions, "\n");
+    while (true) {
+        const input_bytes: []const u8 = try std.fmt.bufPrint(&buf, "{s}{d}", .{ key, i });
+        _ = md5.hash(input_bytes, &md5_hash, .{});
+        if (md5_hash[0] == 0 and md5_hash[1] == 0 and md5_hash[2] == 0) {
+            return i;
+        }
+        i += 1;
+    }
+    return 0;
+}
+
+pub fn main() !void {
+    // Start the timer
+    var total = try std.time.Timer.start();
+
+    var args = std.process.args();
+    _ = args.skip();
+    const file_path = args.next() orelse {
+        std.debug.print("Requires file path to input as arg1\n", .{});
+        return;
+    };
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const allocator = arena.allocator();
+
+    std.debug.print("day 4\n", .{});
+    const content = try read_input(allocator, file_path);
+    var timer = try std.time.Timer.start();
+    const part1 = try part_1(content);
+    const p1_ns = timer.read();
+    timer = try std.time.Timer.start();
+    const part2 = try part_2(content);
+    const p2_ns = timer.read();
+
+    const t_ns = total.read();
+    const p1_ms: f64 = @as(f64, @floatFromInt(p1_ns)) / @as(f64, std.time.ns_per_ms);
+    const p2_ms: f64 = @as(f64, @floatFromInt(p2_ns)) / @as(f64, std.time.ns_per_ms);
+    const t_ms: f64 = @as(f64, @floatFromInt(t_ns)) / @as(f64, std.time.ns_per_ms);
+
+    std.debug.print("Part 1: {d} {d:.3}ms, Part 2: {d} {d:.3}ms | Total: {d:.3}ms\n", .{ part1, p1_ms, part2, p2_ms, t_ms });
+}
