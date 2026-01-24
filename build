@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+pushd zig
+zig build --release=safe
+popd
+pushd rust
+cargo build --release
+popd
+
+

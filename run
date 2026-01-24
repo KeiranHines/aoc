@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+./build &> /dev/null
+
+if [[ $# != 1 ]]; then
+	echo "Usage: run <day>"
+	echo "e.g.: run day1"
+	exit 1
+fi
+
+echo -n "Zig: "
+./zig/zig-out/bin/"$1" input/"$1".txt
+du -h ./zig/zig-out/bin/"$1"
+
+echo -n "Rust: "
+./rust/target/release/"$1" input/"$1".txt
+du -h ./rust/target/release/"$1"
