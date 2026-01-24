@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 pushd zig
-zig build --release=safe
+zig build --release=fast -Doptimize=ReleaseFast
 popd
 pushd rust
 cargo build --release

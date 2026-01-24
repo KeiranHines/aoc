@@ -3,16 +3,26 @@ set -e
 
 ./build &> /dev/null
 
-if [[ $# != 1 ]]; then
-	echo "Usage: run <day>"
-	echo "e.g.: run day1"
-	exit 1
+run () {
+	echo -n "Zig: "
+	./zig/zig-out/bin/"$1" input/"$1".txt
+	du -h ./zig/zig-out/bin/"$1"
+	
+	echo -n "Rust: "
+	./rust/target/release/"$1" input/"$1".txt
+	du -h ./rust/target/release/"$1"
+}
+
+if [[ $# == 1 ]]; then
+	run $1
+	exit 0
 fi
 
-echo -n "Zig: "
-./zig/zig-out/bin/"$1" input/"$1".txt
-du -h ./zig/zig-out/bin/"$1"
+for file in input/*; do
+  if [ -f "$file" ]; then
+	  day=${file:6:-4}
+	  run $day
+	  echo "---------------------------------------------------------------------"
+  fi
+done
 
-echo -n "Rust: "
-./rust/target/release/"$1" input/"$1".txt
-du -h ./rust/target/release/"$1"

@@ -16,11 +16,7 @@ pub fn build(b: *std.Build) !void {
             // Add the file as a source file to the executable
             const day = b.addExecutable(.{
                 .name = name,
-                .root_module = b.createModule(.{
-                    .root_source_file = b.path(file_path),
-                    .target = target,
-                    .optimize = optimize,
-                }),
+                .root_module = b.createModule(.{ .root_source_file = b.path(file_path), .target = target, .optimize = optimize, .strip = true }),
             });
             // Install the client binary to the 'zig-out/bin' directory
             b.installArtifact(day);
