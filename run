@@ -3,6 +3,8 @@ set -e
 
 ./build &> /dev/null
 
+set +e
+
 run () {
 	echo -n "Zig: "
 	./zig/zig-out/bin/"$1" input/"$1".txt
