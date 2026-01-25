@@ -1,7 +1,25 @@
 use regex::Regex;
 use std::{env, fs, time::Instant};
+
+fn find_overlapping_matches(re: &Regex, text: &str) -> usize {
+    let mut m = 0;
+    let mut start = 0;
+
+    while start < text.len() {
+        if let Some(match_val) = re.find_at(text, start) {
+            m += 1;
+            // Advance the start position by one character to check for overlaps
+            start = match_val.start() + 1;
+        } else {
+            // If no match is found from the current position, advance to the next character
+            start += 1;
+        }
+    }
+    m
+}
+
 fn part_1(content: &str) -> usize {
-    let hex = Regex::new(r"(\\x..)").unwrap();
+    let hex_c = Regex::new(r"([^\\]\\x..|\\\\\\x..)").unwrap();
     let quote = Regex::new(r#"(\\"|\\\\)"#).unwrap();
     content
         .trim()
@@ -11,26 +29,29 @@ fn part_1(content: &str) -> usize {
             if raw == 2 {
                 return 2;
             }
-            // Remove the two "
-            let mem = &l[1..raw - 1];
-            // This replaces \\ or \" with " for simplicity
-            let mem = quote.replace_all(mem, "\"").into_owned();
-
-            // This replaces an \x<code> with x for simplicity
-            let mem = hex.replace_all(&mem, "x").into_owned();
-
-            raw - mem.len()
+            let mut c = raw - 2;
+            c -= quote.find_iter(l).count();
+            c -= 3 * find_overlapping_matches(&hex_c, l);
+            raw - c
         })
         .sum()
 }
-fn part_2(_content: &str) -> i16 {
-    0
+fn part_2(content: &str) -> usize {
+    let quote = Regex::new(r#"(\"|\\)"#).unwrap();
+    content
+        .trim()
+        .lines()
+        .map(|l| {
+            let mem = quote.replace_all(l, "\\\"").into_owned();
+            2 + mem.len() - l.len()
+        })
+        .sum()
 }
 
 pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let total = Instant::now();
 
-    println!("day X");
+    println!("day 8");
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         println!("Requires file path to input as arg1");
@@ -80,4 +101,14 @@ fn test_complex() {
     // mem 8
     // total 18
     assert_eq!(ans, 10);
+}
+
+#[test]
+fn test_example2() {
+    let content = r#"""
+"abc"
+"aaa\"aaa"
+"\x27""#;
+    let ans = part_2(&content);
+    assert_eq!(ans, 19);
 }
