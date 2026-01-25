@@ -11,3 +11,4 @@ panic="abort" # abort support unwind from 1.92
 
 [dependencies]
 md-5 = "0.10.6"
+regex = "1.12.2"
