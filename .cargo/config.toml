@@ -1,0 +1,11 @@
+[alias]
+# `cargo aoc`          run every day, print answers + times
+# `cargo aoc 3`        run day 3 only
+# `cargo aoc fetch 3`  download day 3's input
+# `cargo aoc readme`   run every day and write the timing table into README.md
+aoc = "run --release --quiet --"
+
+[build]
+# Use every instruction this CPU supports (AVX2 etc.). Times become machine-specific.
+# Overridden (not merged) if the RUSTFLAGS environment variable is set.
+rustflags = ["-C", "target-cpu=native"]

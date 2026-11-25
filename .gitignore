@@ -1,0 +1,5 @@
+/target
+# Puzzle inputs are not to be redistributed: https://adventofcode.com/about#faq_copying
+/inputs/*.txt
+# AoC session cookie
+.session
